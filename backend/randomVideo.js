@@ -1,96 +1,78 @@
 const axios = require('axios');
 const database = require('./database');
+const express = require('express');
+const router = express.Router();
 require('dotenv').config();
 
-// Check if there was a request in the last 24 hours
-const lastRequest = new Date(req.cookies.lastRequest);
-const currentTime = new Date();
-const diffTime = (currentTime.getTime() - lastRequest.getTime()) / (1000 * 60 * 60);
+router.get('/random-video', async (req, res) => {
+	try {
+		// Ellenőrzi, hogy volt-e kérés az elmúlt 24 órában
+		const lastRequest = req.cookies && req.cookies.lastRequest ? new Date(req.cookies.lastRequest) : null;
+		const currentTime = new Date();
+		const diffTime = (lastRequest && currentTime.getTime() - lastRequest.getTime()) / (1000 * 60 * 60);
+		const lastVideoLink = await database.getLastVideoLink();
 
-if (diffTime < 24) {
-	// If there was a request in the last 24 hours, return the previous video link
-	database.getLastVideoLink((err, row) => {
-		if (err) {
-			console.error(err);
-			res.status(500).send('Internal server error');
-		} else {
+		if (lastVideoLink && diffTime < 24) {
+			// Ha volt kérés az elmúlt 24 órában, visszaadja az előző videó linkjét
+			const row = await database.getLastVideoLink();
 			res.render('video', {
 				video: row.link
 			});
-		}
-	});
-} else {
-	// If more than 24 hours have passed since the last request, generate a new random video
-	getRandomVideo()
-		.then((url) => {
+		} else {
+			// Ha több mint 24 óra telt el az utolsó kérés óta, új véletlenszerű videót generál
+			const url = await getRandomVideo();
 			console.log(url);
-			database.insertNewVideoLink(url, (err) => {
-				if (err) {
-					console.error(err);
-					res.status(500).send('Internal server error');
-				} else {
-					// Display the new video link on the client
-					res.render('video', {
-						video: url
-					});
-
-					const categories = [
-						'1',
-						'2',
-						'10',
-						'15',
-						'17',
-						'19',
-						'20',
-						'22',
-						'23',
-						'24',
-						'25',
-						'26',
-						'27',
-						'28',
-						'29',
-						'30'
-					];
-					const categoryId =
-						categories[Math.floor(Math.random() * categories.length)];
-
-					// YouTube API call to retrieve the new video link
-					const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-					const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&order=date&type=video&videoCategoryId=${categoryId}&key=${youtubeApiKey}`;
-
-					axios
-						.get(apiUrl)
-						.then((response) => {
-							const video = response.data.items[0];
-							const link = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-
-							// Save the new video link to the database
-							database.insertNewVideoLink(link, (err) => {
-								if (err) {
-									console.error(err);
-								}
-							});
-
-							// Set the cookies for the next request
-							res.cookie('lastRequest', new Date(), {
-								maxAge: 24 * 60 * 60 * 1000, // 24 hours
-								httpOnly: true,
-								sameSite: 'strict'
-							});
-						})
-						.catch((err) => {
-							console.error(err);
-							res.status(500).send('Internal server error');
-						});
-				}
+			await database.insertNewVideoLink(url);
+			// Az új videó linkjének megjelenítése a kliensen
+			res.render('video', {
+				video: url
 			});
-		})
-		.catch((error) => {
-			console.error(error);
-			res.status(500).send('Internal server error');
-		});
-}
+
+			const categories = [
+				'1',
+				'2',
+				'10',
+				'15',
+				'17',
+				'19',
+				'20',
+				'22',
+				'23',
+				'24',
+				'25',
+				'26',
+				'27',
+				'28',
+				'29',
+				'30'
+			];
+			const categoryId =
+				categories[Math.floor(Math.random() * categories.length)];
+
+			// YouTube API hívás az új videó linkjének lekéréséhez
+			const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+			const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&order=date&type=video&videoCategoryId=${categoryId}&key=${youtubeApiKey}`;
+
+			const response = await axios.get(apiUrl);
+			const video = response.data.items[0];
+			const link = `https://www.youtube.com/watch?v=${video.id.videoId}`;
+
+			// Az új videó linkjének mentése az adatbázisba
+			await database.insertNewVideoLink(link);
+
+			// A következő kérés cookie-jainak beállítása
+			res.cookie('lastRequest', new Date(), {
+				maxAge: 24 * 60 * 60 * 1000, // 24 óra
+				httpOnly: true,
+				sameSite: 'strict'
+			});
+		}
+	} catch (err) {
+		console.error(err);
+		res.status(500).send('Belső szerverhiba');
+	}
+});
+
 
 async function getRandomVideo() {
 	const {
@@ -115,5 +97,4 @@ async function getRandomVideo() {
 	const videoId = response.data.items[0].id.videoId;
 	return `https://www.youtube.com/watch?v=${videoId}`;
 }
-
 module.exports = getRandomVideo;

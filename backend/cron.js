@@ -15,6 +15,4 @@ const task = new cron.CronJob('0 0 */24 * * *', async function () {
 });
 
 // Indítsuk el a feladatot
-task.start();
-
-module.exports = task;
+module.exports = task.start.bind(task);
