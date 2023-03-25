@@ -24,10 +24,10 @@ router.get('/', async (req, res) => {
 		// } else {
 		// Ha több mint 24 óra telt el az utolsó kérés óta, új véletlenszerű videót generál
 		const videoData = await getRandomVideo();
-		// await database.addLinkToDatabase(videoData);
+		await database.addLinkToDatabase(videoData);
 		// Az új videó linkjének megjelenítése a kliensen
 		res.render('video', {
-			video: videoData.link
+			video: videoData
 		});
 		// }
 	} catch (err) {
@@ -58,13 +58,22 @@ async function getRandomVideo() {
 				'Accept': 'application/json'
 			}
 		});
-		const videoId = response.data.items[0].id.videoId; // videoId kinyerése a válaszból
-		return {
-			link: `https://www.youtube.com/watch?v=${videoId}`
-		};
+		// console.log(response.data.items[0].id.videoId);
+		// return response.data.items[0].id.videoId;
+
+		if (response.data.items && response.data.items.length > 0) {
+			const videoId = response.data.items[0].id.videoId;
+			console.log(`https://www.youtube.com/watch?v=${videoId}`);
+			return `https://www.youtube.com/watch?v=${videoId}`;
+		} else {
+			console.log("No video found or the API does not respond");
+			return null;
+		}
+
+
 	} catch (error) {
 		console.log(error);
-		// return null; // hiba esetén null érték visszaadása
+		return null; // hiba esetén null érték visszaadása
 	}
 }
 

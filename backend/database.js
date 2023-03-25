@@ -9,11 +9,11 @@ db.serialize(() => {
 const addLinkToDatabase = async (myLink) => {
 	const result = await db.get("SELECT * FROM videos WHERE link = ?", [myLink]);
 	if (!result) {
-		await db.run("INSERT INTO videos (link) VALUES (?)", [myLink]);
+		db.run("INSERT INTO videos (link) VALUES (?)", myLink);
 		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()");
 		return {
 			id: record.id,
-			link: record.link,
+			link: myLink,
 			created_at: record.created_at
 		};
 	} else {
@@ -29,45 +29,71 @@ const getAllLinksFromDatabase = () => {
 	return new Promise((resolve, reject) => {
 		db.all("SELECT id, link, created_at FROM videos", [], function (err, rows) {
 			if (err) {
-				reject(err.message);
+				reject(err);
+			} else {
+				const links = rows.map((row) => {
+					return {
+						id: row.id,
+						link: row.link,
+						created_at: row.created_at
+					};
+				});
+				resolve(links);
 			}
-			const links = rows.map((row) => {
-				return {
-					id: row.id,
-					link: row.link,
-					created_at: row.created_at
-				};
-			});
-			resolve(links);
 		});
 	});
 };
 
-const getLastVideoLink = () => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let row = await db.get('SELECT id, link, created_at FROM videos ORDER BY id DESC LIMIT 1');
-			if (row && row.link) {
-				resolve({
-					id: row.id,
-					link: row.link,
-					created_at: row.created_at
+
+const getLastVideoLink = async () => {
+	try {
+		const row = await new Promise((resolve, reject) => {
+			db.get('SELECT id, link, created_at FROM videos ORDER BY id DESC LIMIT 1', (err, row) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(row);
+				}
+			});
+		});
+
+		if (row && row.link) {
+			return {
+				id: row.id,
+				link: row.link,
+				created_at: row.created_at
+			};
+		} else {
+			const video = await randomVideo.getRandomVideo();
+			await new Promise((resolve, reject) => {
+				db.run('INSERT INTO videos (link, created_at) VALUES (?, datetime())', [video], (err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
 				});
-			} else {
-				const video = await randomVideo.getRandomVideo();
-				await db.run(`INSERT INTO videos (link) VALUES (?)`, [video]);
-				const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()");
-				resolve({
-					id: record.id,
-					link: record.link,
-					created_at: record.created_at
+			});
+			const record = await new Promise((resolve, reject) => {
+				db.get('SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()', (err, row) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(row);
+					}
 				});
-			}
-		} catch (err) {
-			reject(err.message);
+			});
+			return {
+				id: record.id,
+				link: record.link,
+				created_at: record.created_at
+			};
 		}
-	});
+	} catch (err) {
+		throw new Error(err.message);
+	}
 };
+
 
 
 module.exports = {
