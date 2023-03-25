@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('C:/Users/adamp/Desktop/randomrobi/RandomRobi/backend/database/videos.db');
+const db = new sqlite3.Database(process.env.dbPath || './db/videos.db');
 const randomVideo = require('./randomVideo');
 
 db.serialize(() => {

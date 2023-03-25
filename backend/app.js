@@ -5,10 +5,6 @@ require('dotenv').config();
 const cors = require('cors');
 const cron = require('node-cron');
 const database = require('./database');
-var errorHandler = require('errorhandler')
-const {
-	google
-} = require('googleapis');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,12 +29,11 @@ db.serialize(() => {
 
 // Schedule cron job to update video every 24 hours
 const task = require('./cron');
-task();
+task.start();
 
 
 // Routes
 app.get('/', async (req, res) => {
-	console.log(process.env.API_KEY);
 	database.getLastVideoLink()
 		.then((row) => {
 			res.send(row);
@@ -52,9 +47,5 @@ app.get('/', async (req, res) => {
 app.listen(port, () => {
 	console.log(`Server is listening on port http://localhost:${port}`);
 });
-app.use(errorHandler({
-	dumpExceptions: true,
-	showStack: true
-}));
 
 module.exports = app;
