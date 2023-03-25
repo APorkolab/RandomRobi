@@ -6,6 +6,9 @@ const cors = require('cors');
 const cron = require('node-cron');
 const database = require('./database');
 var errorHandler = require('errorhandler')
+const {
+	google
+} = require('googleapis');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -34,8 +37,8 @@ task();
 
 
 // Routes
-app.get('/', (req, res) => {
-	console.log(process.env.API);
+app.get('/', async (req, res) => {
+	console.log(process.env.API_KEY);
 	database.getLastVideoLink()
 		.then((row) => {
 			res.send(row);
@@ -47,7 +50,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-	console.log(`Server is listening on port ${port}`);
+	console.log(`Server is listening on port http://localhost:${port}`);
 });
 app.use(errorHandler({
 	dumpExceptions: true,
