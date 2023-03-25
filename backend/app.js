@@ -1,10 +1,11 @@
+"use strict";
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
-const randomVideo = require('./randomVideo');
 require('dotenv').config();
 const cors = require('cors');
 const cron = require('node-cron');
 const database = require('./database');
+var errorHandler = require('errorhandler')
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,7 +13,11 @@ const port = process.env.PORT || 3000;
 const db = new sqlite3.Database(process.env.dbPath || './db/videos.db');
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+	origin: 'same-origin'
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({
 	extended: true
@@ -30,9 +35,10 @@ task();
 
 // Routes
 app.get('/', (req, res) => {
+	console.log(process.env.API);
 	database.getLastVideoLink()
-		.then((link) => {
-			res.send(link);
+		.then((row) => {
+			res.send(row);
 		})
 		.catch((error) => {
 			console.error(error);
@@ -43,6 +49,9 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
 	console.log(`Server is listening on port ${port}`);
 });
-
+app.use(errorHandler({
+	dumpExceptions: true,
+	showStack: true
+}));
 
 module.exports = app;
