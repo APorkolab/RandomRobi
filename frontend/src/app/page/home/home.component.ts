@@ -11,8 +11,8 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  tarara = this.videoService.getLatest()
-  video$ = J;
+  video$: Observable<Video> = this.videoService.getLatest();
+  link = '';
 
   entity: string = 'Video';
 
@@ -21,5 +21,7 @@ export class HomeComponent implements OnInit {
     private router: Router,
   ) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.video$.pipe(map(video => video.link)).subscribe(link => this.link = link);
+  }
 }
