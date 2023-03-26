@@ -1,10 +1,10 @@
 const cron = require('cron');
-const randomVideo = require('./randomVideo');
-const database = require('./database');
+const randomVideo = require('./randomVideoService');
+const database = require('../models/video');
 
 // Hozzuk létre a feladatot, amely minden 24 órában lefut
 const task = new cron.CronJob({
-	cronTime: '0 0 */24 * * *',
+	cronTime: '0 1 0 * * *',
 	onTick: async function () {
 		try {
 			const video = await randomVideo.getRandomVideo();

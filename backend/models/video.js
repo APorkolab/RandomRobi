@@ -1,27 +1,31 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(process.env.dbPath || './db/videos.db');
-const randomVideo = require('./randomVideo');
+const randomVideo = require('../services/randomVideoService');
 
 db.serialize(() => {
 	db.run("CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY AUTOINCREMENT, link TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
 });
 
 const addLinkToDatabase = async (myLink) => {
-	const result = await db.get("SELECT * FROM videos WHERE link = ?", [myLink]);
-	if (!result) {
-		db.run("INSERT INTO videos (link) VALUES (?)", myLink);
-		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()");
-		return {
-			id: record.id,
-			link: myLink,
-			created_at: record.created_at
-		};
-	} else {
-		return {
-			id: result.id,
-			link: result.link,
-			created_at: result.created_at
-		};
+	try {
+		const result = await db.get("SELECT * FROM videos WHERE link = ?", [myLink]);
+		if (!result && myLink) {
+			await db.run("INSERT INTO videos (link) VALUES (?)", myLink);
+			const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()");
+			return {
+				id: record.id,
+				link: myLink,
+				created_at: record.created_at
+			};
+		} else {
+			return {
+				id: result.id,
+				link: result.link,
+				created_at: result.created_at
+			};
+		}
+	} catch (err) {
+		throw new Error(err.message);
 	}
 };
 
@@ -43,7 +47,6 @@ const getAllLinksFromDatabase = () => {
 		});
 	});
 };
-
 
 const getLastVideoLink = async () => {
 	try {
@@ -94,10 +97,39 @@ const getLastVideoLink = async () => {
 	}
 };
 
+const updateLinkInDatabase = async (id, updatedLink) => {
+	try {
+		await db.run("UPDATE videos SET link = ? WHERE id = ?", [updatedLink, id]);
+		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = ?", [id]);
+		return {
+			id: record.id,
+			link: updatedLink,
+			created_at: record.created_at
+		};
+	} catch (err) {
+		throw new Error(err.message);
+	}
+};
+
+const deleteLinkFromDatabase = async (id) => {
+	try {
+		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = ?", [id]);
+		await db.run("DELETE FROM videos WHERE id = ?", [id]);
+		return {
+			id: record.id,
+			link: record.link,
+			created_at: record.created_at
+		};
+	} catch (err) {
+		throw new Error(err.message);
+	}
+};
 
 
 module.exports = {
 	addLinkToDatabase,
 	getAllLinksFromDatabase,
-	getLastVideoLink
+	getLastVideoLink,
+	updateLinkInDatabase,
+	deleteLinkFromDatabase
 };
