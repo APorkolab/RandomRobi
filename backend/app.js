@@ -68,27 +68,34 @@ app.post('/', async (req, res) => {
 	try {
 		const myLink = req.body.link;
 		const record = await addLinkToDatabase(myLink);
-		res.send(record);
+		res.status(201).json({
+			message: 'Video link added successfully',
+			record
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).send('Error adding video link');
 	}
 });
 
-app.put('/:id', async (req, res) => {
+
+app.put('/:id', async (req, res, next) => {
+	const {
+		id
+	} = req.params;
+	const {
+		link
+	} = req.body;
+	if (!link) {
+		return res.status(400).json({
+			error: 'Link is missing'
+		});
+	}
 	try {
-		const id = req.params.id;
-		const newLink = req.body.link;
-		const result = await updateLinkInDatabase(id, newLink);
-		if (result === 1) {
-			const record = await getLinkById(id);
-			res.send(record);
-		} else {
-			res.status(404).send('Video link not found');
-		}
+		const video = await updateLinkInDatabase(id, link);
+		res.status(200).json(video);
 	} catch (error) {
-		console.error(error);
-		res.status(500).send('Error updating video link');
+		next(error);
 	}
 });
 
@@ -96,8 +103,8 @@ app.delete('/:id', async (req, res) => {
 	try {
 		const id = req.params.id;
 		const result = await deleteLinkFromDatabase(id);
-		if (result === 1) {
-			res.status(204).send();
+		if (result === 0) {
+			res.status(200).send('The video link has been deleted.');
 		} else {
 			res.status(404).send('Video link not found');
 		}
@@ -106,6 +113,7 @@ app.delete('/:id', async (req, res) => {
 		res.status(500).send('Error deleting video link');
 	}
 });
+
 
 app.listen(port, () => {
 	console.log(`Server is listening on port http: //localhost:${port}`);

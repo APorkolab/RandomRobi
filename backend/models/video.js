@@ -8,26 +8,37 @@ db.serialize(() => {
 
 const addLinkToDatabase = async (myLink) => {
 	try {
-		const result = await db.get("SELECT * FROM videos WHERE link = ?", [myLink]);
-		if (!result && myLink) {
-			await db.run("INSERT INTO videos (link) VALUES (?)", myLink);
-			const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()");
-			return {
-				id: record.id,
-				link: myLink,
-				created_at: record.created_at
-			};
-		} else {
-			return {
-				id: result.id,
-				link: result.link,
-				created_at: result.created_at
-			};
+		if (!myLink) {
+			throw new Error('Link is missing');
 		}
+		await new Promise((resolve, reject) => {
+			db.run('INSERT INTO videos (link, created_at) VALUES (?, datetime())', [myLink], (err) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+		});
+		const record = await new Promise((resolve, reject) => {
+			db.get('SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()', (err, row) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(row);
+				}
+			});
+		});
+		return {
+			id: record.id,
+			link: record.link,
+			created_at: record.created_at
+		};
 	} catch (err) {
 		throw new Error(err.message);
 	}
 };
+
 
 const getAllLinksFromDatabase = () => {
 	return new Promise((resolve, reject) => {
@@ -99,7 +110,10 @@ const getLastVideoLink = async () => {
 
 const updateLinkInDatabase = async (id, updatedLink) => {
 	try {
-		await db.run("UPDATE videos SET link = ? WHERE id = ?", [updatedLink, id]);
+		const result = await db.run("UPDATE videos SET link = ? WHERE id = ?", [updatedLink, id]);
+		if (result.changes === 0) {
+			throw new Error("Video not found");
+		}
 		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = ?", [id]);
 		return {
 			id: record.id,
@@ -107,23 +121,24 @@ const updateLinkInDatabase = async (id, updatedLink) => {
 			created_at: record.created_at
 		};
 	} catch (err) {
-		throw new Error(err.message);
+		throw err;
 	}
 };
 
 const deleteLinkFromDatabase = async (id) => {
 	try {
-		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = ?", [id]);
 		await db.run("DELETE FROM videos WHERE id = ?", [id]);
-		return {
-			id: record.id,
-			link: record.link,
-			created_at: record.created_at
-		};
+		const result = await db.get("SELECT id FROM videos WHERE id = ?", [id]);
+		if (result) {
+			return 0; // sikertelen törlés
+		} else {
+			return 1; // sikeres törlés
+		}
 	} catch (err) {
 		throw new Error(err.message);
 	}
 };
+
 
 
 module.exports = {
