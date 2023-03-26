@@ -1,0 +1,27 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h1>All Records</h1>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Link</th>
+						<th>Created At</th>
+						<!-- <th>Edit</th>
+						<th>Delete</th> -->
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let video of videos$ |async">
+						<td>{{video.id}}</td>
+						<td>{{video.link}}</td>
+						<td>{{video.created_at}}</td>
+						<td><button class="btn btn-primary" (click)="editVideo(video)">Edit</button></td>
+						<td><button class="btn btn-danger" (click)="deleteVideo(video)">Delete</button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

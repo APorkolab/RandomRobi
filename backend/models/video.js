@@ -59,6 +59,26 @@ const getAllLinksFromDatabase = () => {
 	});
 };
 
+const getByIDFromDatabase = (id) => {
+	return new Promise((resolve, reject) => {
+		db.get("SELECT * FROM videos WHERE id = ?", [id], (err, row) => {
+			if (err) {
+				reject(err);
+			} else if (row === undefined) {
+				resolve(null);
+			} else {
+				resolve({
+					id: row.id,
+					link: row.link,
+					created_at: row.created_at
+				});
+			}
+		});
+	});
+};
+
+
+
 const getLastVideoLink = async () => {
 	try {
 		const row = await new Promise((resolve, reject) => {
@@ -146,5 +166,6 @@ module.exports = {
 	getAllLinksFromDatabase,
 	getLastVideoLink,
 	updateLinkInDatabase,
-	deleteLinkFromDatabase
+	deleteLinkFromDatabase,
+	getByIDFromDatabase
 };

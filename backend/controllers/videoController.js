@@ -3,7 +3,7 @@ const router = express.Router();
 const videoModel = require('../models/video');
 
 // GET all videos
-router.get('/', async (req, res, next) => {
+router.get('/all', async (req, res, next) => {
 	try {
 		const videos = await videoModel.getAllLinksFromDatabase();
 		res.status(200).json(videos);
@@ -13,7 +13,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // GET the last video
-router.get('/last', async (req, res, next) => {
+router.get('/', async (req, res, next) => {
 	try {
 		const video = await videoModel.getLastVideoLink();
 		res.status(200).json(video);
@@ -21,6 +21,22 @@ router.get('/last', async (req, res, next) => {
 		next(error);
 	}
 });
+
+router.get('/:id', async (req, res, next) => {
+	const id = req.params.id;
+	try {
+		const video = await videoModel.getByIDFromDatabase(id);
+		if (!video) {
+			return res.status(404).json({
+				message: 'Video not found'
+			});
+		}
+		res.json(video);
+	} catch (error) {
+		next(error);
+	}
+});
+
 
 // POST a new video
 router.post('/', async (req, res, next) => {

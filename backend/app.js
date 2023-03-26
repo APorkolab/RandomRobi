@@ -11,7 +11,8 @@ const {
 	getLastVideoLink,
 	getAllLinksFromDatabase,
 	updateLinkInDatabase,
-	deleteLinkFromDatabase
+	deleteLinkFromDatabase,
+	getByIDFromDatabase
 } = require('./models/video');
 
 const app = express();
@@ -94,6 +95,21 @@ app.put('/:id', async (req, res, next) => {
 	try {
 		const video = await updateLinkInDatabase(id, link);
 		res.status(200).json(video);
+	} catch (error) {
+		next(error);
+	}
+});
+
+app.get('/:id', async (req, res, next) => {
+	const id = req.params.id;
+	try {
+		const video = await getByIDFromDatabase(id);
+		if (!video) {
+			return res.status(404).json({
+				message: 'Video not found'
+			});
+		}
+		res.json(video);
 	} catch (error) {
 		next(error);
 	}
