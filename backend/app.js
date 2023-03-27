@@ -14,6 +14,7 @@ const {
 	deleteLinkFromDatabase,
 	getByIDFromDatabase
 } = require('./models/video');
+const randomVideo = require('./services/randomVideoService');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -35,7 +36,7 @@ db.serialize(() => {
 // Schedule cron job to update video every 24 hours
 const task = new CronJob('0 1 0 * * *', async () => {
 	try {
-		const video = await randomVideo.getRandomVideo(process.env.API_KEY);
+		const video = await randomVideo.getRandomVideo();
 		const result = await addLinkToDatabase(video);
 		console.log(`New video link has been added to the database: ${result.link}`);
 	} catch (error) {
