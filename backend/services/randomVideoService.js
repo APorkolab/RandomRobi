@@ -47,7 +47,6 @@ router.get('/', async (req, res) => {
 async function getRandomVideo() {
 	require('dotenv').config();
 	const categoryId = Math.floor(Math.random() * 44) + 1;
-	// console.log('categoryId:', categoryId);
 	const maxResults = 1; // number of results to return
 	const maxTries = 5; // maximum number of retries
 
@@ -76,9 +75,8 @@ async function getRandomVideo() {
 				return `https://www.youtube.com/embed/${videoId}`;
 			} else {
 				console.log("No video found or the API does not respond");
-				return null;
+				tries++;
 			}
-
 		} catch (error) {
 			console.log(error);
 			tries++;
@@ -88,6 +86,8 @@ async function getRandomVideo() {
 	console.log(`Failed to retrieve data after ${maxTries} attempts`);
 	return 'https://www.youtube.com/watch?v=1fwJ8H5wWCU';
 }
+
+
 
 module.exports = {
 	getRandomVideo
