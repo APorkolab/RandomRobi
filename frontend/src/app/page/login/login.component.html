@@ -1,0 +1,39 @@
+<body class="text-center">
+
+	<main class="form-signin">
+		<form (ngSubmit)="onLogin()" #loginForm="ngForm" class="form-horizontal mt-3" id="loginform">
+			<img class="mb-4" src="/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+			<h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+
+			<div class="form-floating">
+				<input [(ngModel)]="loginData.username" name="username" type="text" class="form-control" id="floatingInput"
+					placeholder="Username" required minlength="4" maxlength="20" pattern="[a-zA-Z0-9]+">
+				<label for="floatingInput">Username</label>
+				<div data-lastpass-icon-root="true"
+					style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+				</div>
+			</div>
+
+			<div class="form-floating">
+				<input [(ngModel)]="loginData.password" name="password" type="password" class="form-control"
+					id="floatingPassword" placeholder="Password" required minlength="5">
+				<label for="floatingPassword">Password</label>
+				<div data-lastpass-icon-root="true"
+					style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+				</div>
+
+			</div>
+
+			<button class="w-100 btn btn-lg btn-primary" type="submit" [disabled]="loginForm.invalid" *ngIf="loginForm.valid"
+				(click)="onLogin()">Sign in</button>
+			<p class="mt-5 mb-3 text-muted">© 2017–2021</p>
+		</form>
+	</main>
+
+
+	<div data-lastpass-root=""
+		style="position: absolute !important; top: 0px !important; left: 0px !important; height: 0px !important; width: 0px !important;">
+		<div data-lastpass-infield="true" style="position: absolute !important; top: 0px !important; left: 0px !important;">
+		</div>
+	</div>
+</body>

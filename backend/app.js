@@ -25,7 +25,7 @@ const randomVideo = require('./services/randomVideoService');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
+app.options('*', cors())
 const db = new sqlite3.Database(process.env.dbPath || './db/videos.db');
 
 // Middleware
@@ -35,6 +35,7 @@ app.use(express.urlencoded({
 	extended: true
 }));
 
+
 // Set up database
 db.serialize(() => {
 	db.run('CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY, link TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
@@ -43,12 +44,13 @@ db.serialize(() => {
 db.serialize(() => {
 	db.run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, email TEXT)');
 
-	db.get('SELECT id FROM users WHERE username = ?', 'admin', (err, row) => {
+	db.get('SELECT id FROM users WHERE username = ?', 'admin', async (err, row) => {
 		if (!row) {
 			const username = 'admin';
 			const password = 'tarara';
 			const email = 'tarara@tarara.hu';
-			db.run('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [username, password, email], (err) => {
+			const hashedPassword = await bcrypt.hash(password, 10);
+			db.run('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [username, hashedPassword, email], (err) => {
 				if (err) {
 					return console.log(err.message);
 				}
@@ -94,6 +96,47 @@ task.start();
 const authencticateJwt = require('./models/auth/authenticate');
 
 // Routes
+app.post('/login', async (req, res) => {
+	const {
+		username,
+		password
+	} = req.body;
+
+	const user = await User.findOne({
+		where: {
+			username
+		}
+	});
+
+	if (!user) {
+		res.sendStatus(404);
+		return res.json({
+			error: 'This user does not exist'
+		});
+	}
+
+	const valid = await bcrypt.compareSync(password, user.password);
+	if (valid) {
+		const accessToken = jwt.sign({
+				username: user.username
+			},
+			'bociBociTarkaSeFuleSeFarka', {
+				expiresIn: '1h',
+			}
+		);
+
+		res.json({
+			accessToken,
+			user: {
+				...user.toJSON(),
+				password: ''
+			}
+		});
+	} else {
+		return res.sendStatus(401);
+	}
+});
+
 app.get('/', async (req, res) => {
 	try {
 		const row = await getLastVideoLink();
@@ -116,8 +159,12 @@ app.get('/all', authencticateJwt, async (req, res) => {
 
 app.post('/create', authencticateJwt, async (req, res) => {
 	try {
-		const myLink = req.body.link;
-		const record = await addLinkToDatabase(myLink);
+		const {
+			id,
+			link,
+			created_at
+		} = req.body;
+		const record = await addLinkToDatabase(link, created_at);
 		res.status(201).json({
 			message: 'Video link added successfully',
 			record
@@ -128,90 +175,77 @@ app.post('/create', authencticateJwt, async (req, res) => {
 	}
 });
 
-app.post('/', async (req, res) => {
-	const {
-		username,
-		password
-	} = req.body;
-
-	const user = await User.findOne({
-		where: {
-			username
-		}
-	});
-
-	if (!user) {
-		res.sendStatus(404);
-		return res.json({
-			error: 'This user does not exist'
-		});
-	}
-
-	const valid = user.password === password;
-	if (valid) {
-		const accessToken = jwt.sign({
-				userName: user.username
-			},
-			'bociBociTarkaSeFuleSeFarka', {
-				expiresIn: '1h',
-			}
-		);
-
-		res.json({
-			accessToken,
-			user: {
-				...user.toJSON(),
-				password: ''
-			}
-		});
-	} else {
-		return res.sendStatus(401);
-	}
-});
 
 app.put('/:id', authencticateJwt, async (req, res, next) => {
 	const {
 		id
 	} = req.params;
 	const {
-		link
+		link,
+		created_at
 	} = req.body;
-	if (!link) {
+
+	if (!link || !created_at || !id) {
 		return res.status(400).json({
-			error: 'Link is missing'
+			error: 'Missing fields'
 		});
 	}
+
+	const isValidDate = (dateString) => {
+		return !isNaN(Date.parse(dateString));
+	};
+
+	if (!isValidDate(created_at)) {
+		return res.status(400).json({
+			error: 'Invalid date format'
+		});
+	}
+
 	try {
-		const video = await updateLinkInDatabase(id, link);
-		res.status(200).json(video);
+		const video = await updateLinkInDatabase(id, {
+			link,
+			created_at
+		});
+		res.status(200).json({
+			message: 'Video successfully updated'
+		});
 	} catch (error) {
 		next(error);
 	}
 });
 
+
+
+
 app.get('/:id', authencticateJwt, async (req, res, next) => {
 	const id = req.params.id;
 	try {
 		const video = await getByIDFromDatabase(id);
-		if (!video) {
-			return res.status(404).json({
-				message: 'Video not found'
+		if (video) {
+			res.json(video);
+		} else {
+			res.status(404).json({
+				error: 'Video not found'
 			});
 		}
-		res.json(video);
 	} catch (error) {
 		next(error);
 	}
 });
+
 
 app.delete('/:id', authencticateJwt, async (req, res) => {
 	try {
 		const id = req.params.id;
 		const result = await deleteLinkFromDatabase(id);
 		if (result === 0) {
-			res.status(200).send('The video link has been deleted.');
+			res.status(200).json({
+				message: 'The video link has been deleted.'
+			});
 		} else {
-			res.status(404).send('Video link not found');
+			res.status(404).json({
+				message: 'Video link not found.'
+			});
 		}
 	} catch (error) {
 		console.error(error);

@@ -14,10 +14,10 @@
 						<div class="col-md-12">
 							<div class="form-group">
 								<input type="text" class="form-control" name="link" [(ngModel)]="video.link" required
-									pattern="^[a-űA-Űa-zA-Z \-\.,!()']{3,60}$">
+									pattern="^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+">
 							</div>
 							<div [hidden]="videoForm.controls['link']?.valid" class="alert alert-danger" role="alert">
-								The link of the video must be at least 3 letters and must not contains numbers!
+								The link of the video must be a valid YouTube video link!
 							</div>
 						</div>
 					</div>
@@ -26,25 +26,30 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<input type="text" class="form-control" name="created_at" [(ngModel)]="video.created_at" required
-									pattern="^[a-űA-Űa-zA-Z \-\.,!()']{3,60}$">
+								<input type="datetime-local" class="form-control" name="created_at" [(ngModel)]="video.created_at"
+									min="2000-01-01T22:01" max="2100-12-31T23:59">
+								<small class="form-text text-muted">If a timestamp is provided, the system will use that. If left empty,
+									the system will
+									use the current timestamp.</small>
 							</div>
 							<div [hidden]="videoForm.controls['created_at']?.valid" class="alert alert-danger" role="alert">
-								The date of the database record must be at least 3 letters and must not contains numbers!
+								The date of the database record must be a valid timestamp!
 							</div>
 						</div>
 					</div>
 
 					<button *ngIf="video$ | async" (click)="onUpdate(video)" [disabled]="videoForm.invalid" type="submit"
 						class="btn btn-primary pull-right me-md-3">Update
-						data of YouTube-video</button>
+						data of YoutTube-video</button>
 					<button *ngIf="!(video$ | async)" (click)="onCreate(video)" [disabled]="videoForm.invalid" type="submit"
 						class="btn btn-primary pull-right me-md-3">Create
-						data of YouTube-video</button>
+						data of YoutTube-video</button>
 					<button routerLink="/admin" type="button" class="btn btn-danger pull-left">Cancel
 						edit</button>
 					<div class="clearfix"></div>
+
 				</form>
+
 			</div>
 		</div>
 	</div>

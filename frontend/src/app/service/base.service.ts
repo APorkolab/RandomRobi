@@ -29,16 +29,17 @@ export class BasicService<
   }
 
   create(entity: T): Observable<T> {
-    const newEntity = { ...entity, id: null };
-    return this.http.post<T>(`${this.apiUrl}/}`, newEntity);
+    const newEntity = { ...entity };
+    return this.http.post<T>(`${this.apiUrl}/create`, newEntity);
   }
 
   update(entity: T): Observable<T> {
-    return this.http.patch<T>(
-      `${this.apiUrl}/${this.entity}/${entity.id}`,
+    return this.http.put<T>(
+      `${this.apiUrl}/${entity.id}`,
       entity
     );
   }
+
 
   delete(entity: T): Observable<T> {
     return this.http.delete<T>(`${this.apiUrl}/${entity.id}`);

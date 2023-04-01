@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 })
 export class AdminComponent implements OnInit {
   videos$!: Observable<Video[]>;
-
+  video: Video = new Video();
   constructor(private videoService: VideoService, private router: Router) { }
 
   ngOnInit(): void {
@@ -24,8 +24,23 @@ export class AdminComponent implements OnInit {
   }
 
   deleteVideo(video: Video): void {
-    this.videoService.delete(video).subscribe(() => {
-      this.videos$ = this.videoService.getAll();
+    if (confirm('Are you sure you want to delete this video?')) {
+      this.videoService.delete(video).subscribe({
+        next: () => {
+          this.videos$ = this.videoService.getAll();
+          console.log('Video deleted successfully.');
+        },
+        error: (err) => console.error(err),
+        complete: () => alert('The video has been deleted successfully.'),
+      });
+    }
+  }
+
+  onCreate(video: Video) {
+    this.videoService.create(video).subscribe({
+      next: () => this.router.navigate(['/', 'admin']),
+      error: (err) => console.log(err),
+      complete: () => alert('The new video has been created successfully.'),
     });
   }
 }

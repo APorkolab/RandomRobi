@@ -2,7 +2,9 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminComponent } from './page/admin/admin.component';
 import { HomeComponent } from './page/home/home.component';
+import { LoginComponent } from './page/login/login.component';
 import { VideoEditorComponent } from './page/video-editor/video-editor.component';
+import { AuthGuardService } from './service/auth-guard.service';
 
 const routes: Routes = [
   {
@@ -10,25 +12,29 @@ const routes: Routes = [
     component: HomeComponent,
   },
   {
+    path: 'login',
+    component: LoginComponent,
+  },
+  {
+    path: '*',
+    component: LoginComponent,
+  },
+  {
     path: 'admin',
     component: AdminComponent,
+    canActivate: [AuthGuardService],
   },
   {
     path: 'edit/`0`',
     component: VideoEditorComponent,
-    // canActivate: [AuthGuardService, RoleGuardService],
-    // data: {
-    //   expectedRole: 3,
-    // },
+    canActivate: [AuthGuardService],
   },
   {
     path: 'edit/:id',
     component: VideoEditorComponent,
-    // canActivate: [AuthGuardService, RoleGuardService],
-    // data: {
-    //   expectedRole: 2,
-    // },
-  }
+    canActivate: [AuthGuardService],
+  },
+
 ];
 
 @NgModule({
