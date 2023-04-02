@@ -13,7 +13,7 @@ import { map } from 'rxjs/operators';
 export class HomeComponent implements OnInit {
   video$: Observable<Video> = this.videoService.getLatest();
   link = '';
-
+  showAdminButton = false;
   entity: string = 'Video';
 
   constructor(
@@ -23,5 +23,13 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.video$.pipe(map(video => video.link)).subscribe(link => this.link = link);
+    setTimeout(() => {
+      this.showAdminButton = true;
+      console.log('Admin button revealed.');
+    }, 15000);
+  }
+
+  onAdminClick() {
+    this.router.navigate(['/', 'admin']);
   }
 }

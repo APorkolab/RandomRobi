@@ -15,6 +15,8 @@ import { SorterPipe } from './pipe/sorter.pipe';
 import { FilterPipe } from './pipe/filter.pipe';
 import { JwtInterceptor } from './service/jwt.interceptor';
 import { AuthService } from './service/auth.service';
+import { UserComponent } from './page/user/user.component';
+import { UserEditorComponent } from './page/user-editor/user-editor.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,9 @@ import { AuthService } from './service/auth.service';
     VideoEditorComponent,
     LoginComponent,
     SorterPipe,
-    FilterPipe
+    FilterPipe,
+    UserComponent,
+    UserEditorComponent
   ],
   imports: [
     BrowserModule,

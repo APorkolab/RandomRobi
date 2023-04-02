@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { VideoService } from '../../service/video.service';
 import { Video } from '../../model/video';
+import { AuthService } from 'src/app/service/auth.service';
 
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
@@ -11,9 +12,12 @@ import { Router } from '@angular/router';
   styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit {
+
+  user$ = this.auth.user$;
+
   videos$!: Observable<Video[]>;
   video: Video = new Video();
-  constructor(private videoService: VideoService, private router: Router) { }
+  constructor(private videoService: VideoService, private router: Router, private auth: AuthService) { }
 
   ngOnInit(): void {
     this.videos$ = this.videoService.getAll();

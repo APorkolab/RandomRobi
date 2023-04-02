@@ -249,7 +249,9 @@ app.delete('/:id', authencticateJwt, async (req, res) => {
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).send('Error deleting video link');
+		res.status(500).json({
+			error: 'Error deleting video link'
+		});
 	}
 });
 
@@ -259,10 +261,14 @@ app.delete('/:id', authencticateJwt, async (req, res) => {
 app.post('/user', authencticateJwt, async (req, res) => {
 	try {
 		const user = await User.create(req.body);
-		res.status(201).json(user);
+		res.status(201).json({
+			message: 'New user has been created.'
+		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).send('Error creating user');
+		res.status(500).json({
+			error: 'Error creating user.'
+		});
 	}
 });
 
@@ -309,7 +315,9 @@ app.put('/user/:id', authencticateJwt, async (req, res) => {
 		if (result[0] === 0) {
 			res.status(404).send('User not found');
 		} else {
-			res.status(200).send('User updated successfully');
+			res.status(200).json({
+				message: 'The user has been updated.'
+			});
 		}
 	} catch (error) {
 		console.error(error);
@@ -325,16 +333,17 @@ app.delete('/user/:id', authencticateJwt, async (req, res) => {
 				id: req.params.id
 			}
 		});
-		if (result === 0) {
-			res.status(404).send('User not found');
-		} else {
-			res.status(200).send('User deleted successfully');
-		}
+		res.status(200).json({
+			message: 'The user has been deleted.'
+		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).send('Error deleting user');
+		res.status(500).json({
+			error: 'Error deleting user'
+		});
 	}
 });
+
 
 app.listen(port, () => {
 	console.log(`Server is listening on port http://localhost:${port}`);
