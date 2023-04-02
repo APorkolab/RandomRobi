@@ -9,6 +9,7 @@
     "test": "ng test"
   },
   "private": true,
+  "homepage": "https://www.randomrobi.hu",
   "dependencies": {
     "@angular/animations": "^15.0.0",
     "@angular/common": "^15.0.0",
