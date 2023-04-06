@@ -1,141 +1,106 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(process.env.dbPath || './db/videos.db');
+const {
+	DataTypes
+} = require('sequelize');
+const sequelize = require('../config/database');
 const randomVideo = require('../services/randomVideoService');
 
-
-
-db.serialize(() => {
-	db.run("CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY AUTOINCREMENT, link TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+const Video = sequelize.define('videos', {
+	id: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		primaryKey: true,
+		autoIncrement: true
+	},
+	link: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	createdAt: {
+		type: DataTypes.DATE,
+		allowNull: false,
+		defaultValue: DataTypes.NOW
+	}
+}, {
+	freezeTableName: true,
+	timestamps: false,
 });
 
-const addLinkToDatabase = async (
-	link,
-	created_at) => {
+const addLinkToDatabase = async (link, createdAt) => {
 	try {
 		if (!link) {
 			throw new Error('Link is missing');
 		}
-		await new Promise((resolve, reject) => {
-			db.run(
-				'INSERT INTO videos (link, created_at) VALUES (?, ?)',
-				[link, created_at || new Date().toISOString()],
-				(err) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve();
-					}
-				}
-			);
-		});
-		const record = await new Promise((resolve, reject) => {
-			db.get(
-				'SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()',
-				(err, row) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(row);
-					}
-				}
-			);
+		const video = await Video.create({
+			link: link,
+			createdAt: createdAt || new Date().toISOString()
 		});
 		return {
-			id: record.id,
-			link: record.link,
-			created_at: record.created_at,
+			id: video.id,
+			link: video.link,
+			createdAt: video.createdAt
 		};
 	} catch (err) {
-		throw err; // Visszaadja az eredeti kivételt
+		throw err;
 	}
 };
 
-module.exports = addLinkToDatabase;
-
-
-
-
-const getAllLinksFromDatabase = () => {
-	return new Promise((resolve, reject) => {
-		db.all("SELECT id, link, created_at FROM videos", [], function (err, rows) {
-			if (err) {
-				reject(err);
-			} else {
-				const links = rows.map((row) => {
-					return {
-						id: row.id,
-						link: row.link,
-						created_at: row.created_at
-					};
-				});
-				resolve(links);
-			}
+const getAllLinksFromDatabase = async () => {
+	try {
+		const videos = await Video.findAll({
+			attributes: ['id', 'link', 'createdAt']
 		});
-	});
+		return videos.map(video => ({
+			id: video.id,
+			link: video.link,
+			createdAt: video.createdAt
+		}));
+	} catch (err) {
+		throw err;
+	}
 };
 
-const getByIDFromDatabase = (id) => {
-	return new Promise((resolve, reject) => {
-		db.get("SELECT * FROM videos WHERE id = ?", [id], (err, row) => {
-			if (err) {
-				reject(err);
-			} else if (row === undefined) {
-				resolve(null);
-			} else {
-				resolve({
-					id: row.id,
-					link: row.link,
-					created_at: row.created_at
-				});
-			}
+const getByIdFromDatabase = async (id) => {
+	try {
+		const video = await Video.findOne({
+			where: {
+				id: id
+			},
+			attributes: ['id', 'link', 'createdAt']
 		});
-	});
+		return video ? {
+			id: video.id,
+			link: video.link,
+			createdAt: video.createdAt
+		} : null;
+	} catch (err) {
+		throw err;
+	}
 };
-
-
 
 const getLastVideoLink = async () => {
 	try {
-		const row = await new Promise((resolve, reject) => {
-			db.get('SELECT id, link, created_at FROM videos ORDER BY id DESC LIMIT 1', (err, row) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve(row);
-				}
-			});
+		const video = await Video.findOne({
+			order: [
+				['id', 'DESC']
+			],
+			attributes: ['id', 'link', 'createdAt']
 		});
-
-		if (row && row.link) {
+		if (video && video.link) {
 			return {
-				id: row.id,
-				link: row.link,
-				created_at: row.created_at
+				id: video.id,
+				link: video.link,
+				createdAt: video.createdAt
 			};
 		} else {
-			const video = await randomVideo.getRandomVideo();
-			await new Promise((resolve, reject) => {
-				db.run('INSERT INTO videos (link, created_at) VALUES (?, datetime())', [video], (err) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve();
-					}
-				});
-			});
-			const record = await new Promise((resolve, reject) => {
-				db.get('SELECT id, link, created_at FROM videos WHERE id = last_insert_rowid()', (err, row) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(row);
-					}
-				});
+			const link = await randomVideo.getRandomVideo();
+			const newVideo = await Video.create({
+				link: link,
+				createdAt: new Date().toISOString()
 			});
 			return {
-				id: record.id,
-				link: record.link,
-				created_at: record.created_at
+				id: newVideo.id,
+				link: newVideo.link,
+				createdAt: newVideo.createdAt
 			};
 		}
 	} catch (err) {
@@ -145,47 +110,56 @@ const getLastVideoLink = async () => {
 
 const updateLinkInDatabase = async (id, {
 	link,
-	created_at
+	createdAt
 }) => {
-	const formattedDate = new Date(created_at).toISOString().replace('T', ' ').slice(0, -5);
+	const formattedDate = new Date(createdAt).toISOString().replace('T', ' ').slice(0, -5);
 	try {
-		const result = await db.run(
-			"UPDATE videos SET link = ?, created_at = ? WHERE id = ?",
-			[link, formattedDate, id]
-		);
-		if (result.changes === 0) {
+		const result = await Video.update({
+			link: link,
+			createdAt: formattedDate
+		}, {
+			where: {
+				id: id
+			}
+		});
+		if (result[0] === 0) {
 			throw new Error("Video not found");
 		}
-		const record = await db.get("SELECT id, link, created_at FROM videos WHERE id = ?", [id]);
-		return record;
+		const video = await Video.findOne({
+			where: {
+				id: id
+			},
+			attributes: ['id', 'link', 'createdAt']
+		});
+		return {
+			id: video.id,
+			link: video.link,
+			createdAt: video.createdAt
+		};
 	} catch (err) {
 		throw err;
 	}
 };
 
-
-
 const deleteLinkFromDatabase = async (id) => {
 	try {
-		await db.run("DELETE FROM videos WHERE id = ?", [id]);
-		const result = await db.get("SELECT id FROM videos WHERE id = ?", [id]);
-		if (result) {
-			return 0; // sikertelen törlés
-		} else {
-			return 1; // sikeres törlés
-		}
-	} catch (err) {
-		throw new Error(err.message);
+		const result = await Video.destroy({
+			where: {
+				id: id
+			}
+		});
+		return result ? 1 : 0;
+	} catch (error) {
+		throw new Error(error.message);
 	}
 };
 
-
-
 module.exports = {
+	Video,
 	addLinkToDatabase,
 	getAllLinksFromDatabase,
+	getByIdFromDatabase,
 	getLastVideoLink,
 	updateLinkInDatabase,
 	deleteLinkFromDatabase,
-	getByIDFromDatabase
 };

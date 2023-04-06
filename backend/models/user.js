@@ -1,44 +1,51 @@
-const {
-	Sequelize,
-	DataTypes
-} = require('sequelize');
-
 const bcrypt = require('bcrypt');
-
-const sequelize = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	storage: process.env.dbPath || './db/videos.db',
-});
-
-const User = sequelize.define('User', {
+const Sequelize = require("sequelize");
+const db = require("../config/database");
+var userSchema = db.define("users", {
 	id: {
-		type: DataTypes.INTEGER,
+		type: Sequelize.INTEGER,
 		primaryKey: true,
 		autoIncrement: true
 	},
 	username: {
-		type: DataTypes.STRING,
+		type: Sequelize.STRING,
 		allowNull: false
 	},
 	password: {
-		type: DataTypes.STRING,
+		type: Sequelize.STRING,
 		allowNull: false
 	},
 	email: {
-		type: DataTypes.STRING,
+		type: Sequelize.STRING,
 		allowNull: true
 	}
 }, {
-	timestamps: false
+	// freeze name table not using *s on name
+	freezeTableName: true,
+	// dont use createdAt/update
+	timestamps: false,
+	hooks: {
+		beforeCreate: async (user) => {
+			if (user.password) {
+				const salt = await bcrypt.genSaltSync(10, 'a');
+				user.password = bcrypt.hashSync(user.password, salt);
+			}
+		},
+		beforeUpdate: async (user) => {
+			if (user.password) {
+				const salt = await bcrypt.genSaltSync(10, 'a');
+				user.password = bcrypt.hashSync(user.password, salt);
+			}
+		}
+	},
+	instanceMethods: {
+		validPassword: (password) => {
+			return bcrypt.compareSync(password, this.password);
+		}
+	}
 });
-
-User.beforeCreate(async (user) => {
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(user.password, salt);
-	user.password = hashedPassword;
-});
-
-sequelize.sync();
-
-module.exports = User;
+userSchema.prototype.validPassword = async (password, hash) => {
+	return await bcrypt.compareSync(password, hash);
+}
+module.exports = userSchema;
+return userSchema;
