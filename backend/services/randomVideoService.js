@@ -84,7 +84,7 @@ async function getRandomVideo() {
 	}
 
 	console.log(`Failed to retrieve data after ${maxTries} attempts`);
-	return 'https://www.youtube.com/watch?v=1fwJ8H5wWCU';
+	return 'https://www.youtube.com/embed/1fwJ8H5wWCU';
 }
 
 
