@@ -17,7 +17,7 @@ body {
 
 h1 {
   font-family: 'Montserrat', sans-serif;
-  font-size: 3rem;
+  font-size: 4rem;
   font-weight: 700;
   color: $primary-color;
   text-shadow: 2px 2px #000000;
@@ -52,7 +52,7 @@ h1 {
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
   min-height: calc(100vh - #{$footer-height});
 }
 
@@ -61,17 +61,17 @@ h1 {
   position: relative;
   z-index: 1;
   height: 100%;
-  padding-bottom: 50px;
+  padding-bottom: 6.9%;
 
 }
 
 footer {
   text-align: center;
   width: 100%;
-  height: $footer-height;
+  height: #{$footer-height};
   position: relative;
   margin-top: -#{$footer-height};
-  margin-bottom: 0;
+
 }
 
 .background {
