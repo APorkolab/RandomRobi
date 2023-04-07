@@ -69,7 +69,6 @@ export class AuthService {
     sessionStorage.removeItem('access_token');
     this.user$.next(null);
     this.access_token$.next('');
-    this.router.navigate(['/']);
   }
 
   getAccessToken(): string {
