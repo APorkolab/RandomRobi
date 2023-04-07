@@ -1,7 +1,10 @@
 const bcrypt = require('bcrypt');
 const Sequelize = require("sequelize");
 const db = require("../config/database");
-var userSchema = db.define("users", {
+const saltRounds = 10;
+const salt = bcrypt.genSaltSync(saltRounds);
+
+const userSchema = db.define("users", {
 	id: {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
@@ -20,32 +23,24 @@ var userSchema = db.define("users", {
 		allowNull: true
 	}
 }, {
-	// freeze name table not using *s on name
 	freezeTableName: true,
-	// dont use createdAt/update
 	timestamps: false,
 	hooks: {
 		beforeCreate: async (user) => {
 			if (user.password) {
-				const salt = await bcrypt.genSaltSync(10, 'a');
-				user.password = bcrypt.hashSync(user.password, salt);
+				user.password = await bcrypt.hash(user.password, salt);
 			}
 		},
 		beforeUpdate: async (user) => {
 			if (user.password) {
-				const salt = await bcrypt.genSaltSync(10, 'a');
-				user.password = bcrypt.hashSync(user.password, salt);
+				user.password = await bcrypt.hash(user.password, salt);
 			}
-		}
-	},
-	instanceMethods: {
-		validPassword: (password) => {
-			return bcrypt.compareSync(password, this.password);
 		}
 	}
 });
-userSchema.prototype.validPassword = async (password, hash) => {
-	return await bcrypt.compareSync(password, hash);
-}
+
+userSchema.prototype.validPassword = async function (password) {
+	return await bcrypt.compare(password, this.password);
+};
+
 module.exports = userSchema;
-return userSchema;

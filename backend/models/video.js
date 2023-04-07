@@ -1,41 +1,42 @@
-const {
-	DataTypes
-} = require('sequelize');
-const sequelize = require('../config/database');
 const randomVideo = require('../services/randomVideoService');
+const db = require("../config/database");
 
-const Video = sequelize.define('videos', {
+const Sequelize = require("sequelize");
+
+const videoSchema = db.define("videos", {
 	id: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
+		type: Sequelize.INTEGER,
 		primaryKey: true,
-		autoIncrement: true
+		autoIncrement: true,
+		allowNull: false, // <---- hozzáadva
 	},
 	link: {
-		type: DataTypes.STRING,
+		type: Sequelize.STRING,
 		allowNull: false
 	},
 	createdAt: {
-		type: DataTypes.DATE,
-		allowNull: false,
-		defaultValue: DataTypes.NOW
+		type: Sequelize.DATE,
+		defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+		allowNull: false
 	}
 }, {
 	freezeTableName: true,
 	timestamps: false,
 });
 
+
+
+
 const addLinkToDatabase = async (link, createdAt) => {
 	try {
 		if (!link) {
 			throw new Error('Link is missing');
 		}
-		const video = await Video.create({
+		const video = await videoSchema.create({
 			link: link,
 			createdAt: createdAt || new Date().toISOString()
 		});
 		return {
-			id: video.id,
 			link: video.link,
 			createdAt: video.createdAt
 		};
@@ -44,9 +45,10 @@ const addLinkToDatabase = async (link, createdAt) => {
 	}
 };
 
+
 const getAllLinksFromDatabase = async () => {
 	try {
-		const videos = await Video.findAll({
+		const videos = await videoSchema.findAll({
 			attributes: ['id', 'link', 'createdAt']
 		});
 		return videos.map(video => ({
@@ -61,7 +63,7 @@ const getAllLinksFromDatabase = async () => {
 
 const getByIdFromDatabase = async (id) => {
 	try {
-		const video = await Video.findOne({
+		const video = await videoSchema.findOne({
 			where: {
 				id: id
 			},
@@ -79,7 +81,7 @@ const getByIdFromDatabase = async (id) => {
 
 const getLastVideoLink = async () => {
 	try {
-		const video = await Video.findOne({
+		const video = await videoSchema.findOne({
 			order: [
 				['id', 'DESC']
 			],
@@ -93,7 +95,7 @@ const getLastVideoLink = async () => {
 			};
 		} else {
 			const link = await randomVideo.getRandomVideo();
-			const newVideo = await Video.create({
+			const newVideo = await videoSchema.create({
 				link: link,
 				createdAt: new Date().toISOString()
 			});
@@ -114,7 +116,7 @@ const updateLinkInDatabase = async (id, {
 }) => {
 	const formattedDate = new Date(createdAt).toISOString().replace('T', ' ').slice(0, -5);
 	try {
-		const result = await Video.update({
+		const result = await videoSchema.update({
 			link: link,
 			createdAt: formattedDate
 		}, {
@@ -125,7 +127,7 @@ const updateLinkInDatabase = async (id, {
 		if (result[0] === 0) {
 			throw new Error("Video not found");
 		}
-		const video = await Video.findOne({
+		const video = await videoSchema.findOne({
 			where: {
 				id: id
 			},
@@ -143,7 +145,7 @@ const updateLinkInDatabase = async (id, {
 
 const deleteLinkFromDatabase = async (id) => {
 	try {
-		const result = await Video.destroy({
+		const result = await videoSchema.destroy({
 			where: {
 				id: id
 			}
@@ -155,7 +157,7 @@ const deleteLinkFromDatabase = async (id) => {
 };
 
 module.exports = {
-	Video,
+	videoSchema,
 	addLinkToDatabase,
 	getAllLinksFromDatabase,
 	getByIdFromDatabase,
@@ -163,3 +165,5 @@ module.exports = {
 	updateLinkInDatabase,
 	deleteLinkFromDatabase,
 };
+
+return videoSchema;

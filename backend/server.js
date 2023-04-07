@@ -2,7 +2,8 @@ const express = require('express');
 require('dotenv').config();
 const app = express();
 const User = require('./models/user');
-const video = require('./models/video');
+const videoSchema = require('./models/video');
+
 const logger = require('./logger/logger');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
@@ -13,31 +14,26 @@ const sequelize = require('./config/database');
 const {
 	CronJob
 } = require('cron');
-const {
-	addLinkToDatabase,
-	getLastVideoLink,
-	getAllLinksFromDatabase,
-	updateLinkInDatabase,
-	deleteLinkFromDatabase,
-	getByIDFromDatabase
-} = require('./models/video');
+// const {
+// 	addLinkToDatabase
+// } = require('./models/video');
 const randomVideo = require('./services/randomVideoService');
 
 sequelize.authenticate()
 	.then(() => {
 		console.log('Connected to database.');
+		return sequelize.sync();
+	})
+	.then(() => {
+		console.log('All models synced.');
 	})
 	.catch((error) => {
 		console.log(`Unable to connect to the database: ${error}`);
-	})
-	.then(() => {
-		User.sync();
-	}).then(() => {
-		question.sync();
-	}).then(
-		// require('./seed/seeder'), // Seed the database, ONLY ONCE MUST RUN
-		// logger.info('Data has been seeded into the database.'),
-	).catch(err => logger.error(err));
+	});
+
+
+
+
 
 
 //Cross Origin Resource Sharing
@@ -93,7 +89,7 @@ const task = new CronJob('0 1 0 * * *', async () => {
 
 	if (video) {
 		try {
-			const result = await addLinkToDatabase(video);
+			const result = await videoSchema.addLinkToDatabase(video);
 			console.log(`New video link has been added to the database: ${result.link}`);
 		} catch (error) {
 			console.error(error);

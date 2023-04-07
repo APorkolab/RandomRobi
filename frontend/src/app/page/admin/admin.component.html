@@ -1,11 +1,25 @@
 <div class="container-fluid">
 	<div class="row">
-		<button *ngIf="(user$ | async)" routerLink="/login" type="button" class="btn btn-danger">Sign out</button>
-		<button *ngIf="!(user$ | async)" routerLink="/login" type="button" class="btn btn-info">Sign in</button>
-		<button routerLink="/users" type="button" class="btn btn-dark">Go to Users Page</button>
-		<div class="col-md-12">
+		<button *ngIf="(user$ | async)" routerLink="/login" type="button" class="btn btn-danger mb-2">Sign out</button>
+		<button *ngIf="!(user$ | async)" routerLink="/login" type="button" class="btn btn-info mb-2">Sign in</button>
+		<button class="btn btn-primary" [routerLink]="'/edit/0'">Create</button>
+		<button routerLink="/users" type="button" class="btn btn-dark">Go to User Page</button>
+		<div class="col-md-12 justify-content-center">
 			<h1>Admin page of the RandomRobi</h1>
-			<button class="btn btn-primary mb-3" [routerLink]="'/edit/0'">Create</button>
+
+			<div class="row justify-content-center">
+				<div class="col-md-6">
+					<div class="input-group mb-3">
+						<select [(ngModel)]="filterKey" id="tableSearch" class="form-select col-md-3">
+							<option value="">Search in every column</option>
+							<option *ngFor="let key of columns" [selected]="key.title === filterKey" [value]="key.title">
+								{{ key.title }}
+							</option>
+						</select>
+						<input [(ngModel)]="phrase" type="text" class="form-control col-md-9" placeholder="Search in the data...">
+					</div>
+				</div>
+			</div>
 
 			<table class="table table-hover">
 				<thead>
@@ -17,16 +31,35 @@
 						<th>Delete</th>
 					</tr>
 				</thead>
-				<tbody>
-					<tr *ngFor="let video of videos$ |async">
-						<td>{{video.id}}</td>
-						<td>{{video.link}}</td>
-						<td>{{video.created_at}}</td>
+
+				<tbody *ngIf="videos$ | async as videos">
+					<tr
+						*ngFor="let video of videos | slice: startSlice:endSlice | filter:phrase:keys[filterKey] | sort:columnKey:sortDir">
+						<td *ngFor="let col of columns">{{ video[col.key] }}</td>
 						<td><button class="btn btn-primary" (click)="editVideo(video)">Edit</button></td>
 						<td><button class="btn btn-danger" (click)="deleteVideo(video)">Delete</button></td>
 					</tr>
 				</tbody>
 			</table>
-		</div>
-	</div>
-</div>
+
+			<div class="pt-2 row">
+				<nav aria-label="paginator">
+					<ul class="pagination pagination-lg mt-12 justify-content-center">
+						<li [className]="page===1 ? 'page-item disabled' : 'page-item'">
+							<button class="page-link" (click)="jumptoPage(page - 1)" [disabled]="page===1">
+								Previous
+							</button>
+						</li>
+						<li *ngFor="let pageNum of pageList" class="page-item">
+							<button [className]="page===pageNum ? 'page-link active' : 'page-link'" (click)=" jumptoPage(pageNum)">
+								{{ pageNum }}
+							</button>
+						</li>
+						<li [className]="page===pageList.length ? 'page-item disabled' : 'page-item'">
+							<button class="page-link" (click)="jumptoPage(page + 1)" [disabled]="page===pageList.length">
+								Next
+							</button>
+						</li>
+					</ul>
+				</nav>
+			</div>

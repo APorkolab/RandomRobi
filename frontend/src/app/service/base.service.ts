@@ -21,27 +21,26 @@ export class BasicService<
   }
 
   getAll(): Observable<T[]> {
-    return this.http.get<T[]>(`${this.apiUrl}/all`);
+    return this.http.get<T[]>(`${this.apiUrl}/${this.entity}/all`);
   }
 
   getOne(id: string | number): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/${id}`);
+    return this.http.get<T>(`${this.apiUrl}/${this.entity}/${id}`);
   }
 
   create(entity: T): Observable<T> {
-    const newEntity = { ...entity };
-    return this.http.post<T>(`${this.apiUrl}/create`, newEntity);
+    const newEntity = { ...entity, id: null };
+    return this.http.post<T>(`${this.apiUrl}/${this.entity}/`, newEntity);
   }
 
   update(entity: T): Observable<T> {
     return this.http.put<T>(
-      `${this.apiUrl}/${entity.id}`,
+      `${this.apiUrl}/${this.entity}/${entity.id}`,
       entity
     );
   }
 
-
   delete(entity: T): Observable<T> {
-    return this.http.delete<T>(`${this.apiUrl}/${entity.id}`);
+    return this.http.delete<T>(`${this.apiUrl}/${this.entity}/${entity.id}`);
   }
 }

@@ -12,17 +12,16 @@ router.get('/all', async (req, res) => {
 	}
 });
 
-router.post('/create', async (req, res) => {
+router.post('/', async (req, res) => {
 	try {
 		const {
-			id,
 			link,
-			created_at
+			createdAt
 		} = req.body;
-		const record = await videoModel.addLinkToDatabase(link, created_at);
+		const record = await videoModel.addLinkToDatabase(link, createdAt);
 		res.status(201).json({
 			message: 'Video link added successfully',
-			record
+			record,
 		});
 	} catch (error) {
 		console.error(error);
@@ -31,16 +30,17 @@ router.post('/create', async (req, res) => {
 });
 
 
+
 router.put('/:id', async (req, res, next) => {
 	const {
 		id
 	} = req.params;
 	const {
 		link,
-		created_at
+		createdAt
 	} = req.body;
 
-	if (!link || !created_at || !id) {
+	if (!link || !createdAt || !id) {
 		return res.status(400).json({
 			error: 'Missing fields'
 		});
@@ -50,7 +50,7 @@ router.put('/:id', async (req, res, next) => {
 		return !isNaN(Date.parse(dateString));
 	};
 
-	if (!isValidDate(created_at)) {
+	if (!isValidDate(createdAt)) {
 		return res.status(400).json({
 			error: 'Invalid date format'
 		});
@@ -59,7 +59,7 @@ router.put('/:id', async (req, res, next) => {
 	try {
 		const video = await videoModel.updateLinkInDatabase(id, {
 			link,
-			created_at
+			createdAt
 		});
 		res.status(200).json({
 			message: 'Video successfully updated'
@@ -72,7 +72,7 @@ router.put('/:id', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
 	const id = req.params.id;
 	try {
-		const video = await videoModel.getByIDFromDatabase(id);
+		const video = await videoModel.getByIdFromDatabase(id);
 		if (video) {
 			res.json(video);
 		} else {
@@ -89,22 +89,17 @@ router.get('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res) => {
 	try {
 		const id = req.params.id;
-		const result = await videoModel.deleteLinkFromDatabase(id);
-		if (result === 0) {
-			res.status(200).json({
-				message: 'The video link has been deleted.'
-			});
-		} else {
-			res.status(404).json({
-				message: 'Video link not found.'
-			});
-		}
+		await videoModel.deleteLinkFromDatabase(id);
+		res.status(200).json({
+			message: `The video link with id ${id} has been deleted.`
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
-			error: 'Error deleting video link'
+			error: `Error deleting video link with id ${id}: ${error.message}`
 		});
 	}
 });
+
 
 module.exports = router;

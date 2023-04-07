@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const User = require('../../models/user');
+const bcrypt = require('bcrypt');
 
 // CREATE
-router.post('/user', async (req, res) => {
+router.post('/', async (req, res) => {
 	try {
-		const user = await User.create(req.body);
+		await User.create(req.body);
 		res.status(201).json({
 			message: 'New user has been created.'
 		});
@@ -17,7 +19,7 @@ router.post('/user', async (req, res) => {
 });
 
 // READ ALL
-router.get('/user/all', async (req, res) => {
+router.get('/all', async (req, res) => {
 	try {
 		const users = await User.findAll();
 		res.json(users);
@@ -28,7 +30,7 @@ router.get('/user/all', async (req, res) => {
 });
 
 // READ ONE
-router.get('/user/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
 	try {
 		const user = await User.findByPk(req.params.id);
 		if (!user) {
@@ -43,13 +45,16 @@ router.get('/user/:id', async (req, res) => {
 });
 
 // UPDATE
-router.put('/user/:id', async (req, res) => {
+const hashPassword = async (password) => {
+	const salt = await bcrypt.genSalt(10);
+	return bcrypt.hash(password, salt);
+};
+
+router.put('/:id', async (req, res) => {
 	try {
 		let updatedUser = req.body;
 		if (updatedUser.password) {
-			const salt = await bcrypt.genSalt(10);
-			const hashedPassword = await bcrypt.hash(updatedUser.password, salt);
-			updatedUser.password = hashedPassword;
+			updatedUser.password = await hashPassword(updatedUser.password);
 		}
 		const result = await User.update(updatedUser, {
 			where: {
@@ -57,7 +62,9 @@ router.put('/user/:id', async (req, res) => {
 			}
 		});
 		if (result[0] === 0) {
-			res.status(404).send('User not found');
+			res.status(404).json({
+				error: 'User not found'
+			});
 		} else {
 			res.status(200).json({
 				message: 'The user has been updated.'
@@ -65,21 +72,30 @@ router.put('/user/:id', async (req, res) => {
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).send('Error updating user');
+		res.status(500).json({
+			error: 'Error updating user'
+		});
 	}
 });
 
+
 // DELETE
-router.delete('/user/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
 	try {
 		const result = await User.destroy({
 			where: {
 				id: req.params.id
 			}
 		});
-		res.status(200).json({
-			message: 'The user has been deleted.'
-		});
+		if (result === 0) {
+			res.status(404).json({
+				error: 'User not found'
+			});
+		} else {
+			res.status(200).json({
+				message: 'The user has been deleted.'
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({

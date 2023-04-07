@@ -10,6 +10,6 @@ import { Video } from '../model/video';
 export class VideoService extends BasicService<Video> {
   constructor(http: HttpClient) {
     super(http);
-    this.entity = '';
+    this.entity = 'video';
   }
 }
