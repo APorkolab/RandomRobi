@@ -1,52 +1,15 @@
 "use strict";
 const axios = require('axios');
-const database = require('../models/video');
+const crypto = require('crypto');
+
 const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-router.get('/', async (req, res) => {
-	try {
-		// Ellenőrzi, hogy volt-e kérés az elmúlt 24 órában
-		const lastRequest = req.cookies && req.cookies.lastRequest ? new Date(req.cookies.lastRequest) : null;
-		const currentTime = new Date();
-		const lastVideoLink = await database.getLastVideoLink();
-
-		if (lastVideoLink) {
-			const lastVideoDate = new Date(lastVideoLink.created_at);
-			if (lastRequest && isSameDay(lastRequest, lastVideoDate)) {
-				// Ha volt kérés az elmúlt 24 órában, visszaadja az előző videó linkjét
-				res.send(lastVideoLink);
-			} else {
-				// Ha több mint 24 óra telt el az utolsó kérés óta, új véletlenszerű videót generál
-				const videoData = await getRandomVideo();
-				await database.addLinkToDatabase(videoData);
-				// Az új videó linkjének megjelenítése a kliensen
-				res.send(videoData);
-			}
-		} else {
-			// Ha még nincs videó az adatbázisban, újat generál
-			const videoData = await getRandomVideo();
-			await database.addLinkToDatabase(videoData);
-			// Az új videó linkjének megjelenítése a kliensen
-			res.send(videoData);
-		}
-
-		// A kérés idejének elmentése a sütibe
-		res.cookie('lastRequest', currentTime.toISOString(), {
-			maxAge: 24 * 60 * 60 * 1000,
-			httpOnly: true
-		});
-	} catch (err) {
-		console.error(err);
-		res.status(500).send('Belső szerverhiba');
-	}
-});
-
 
 async function getRandomVideo() {
 	require('dotenv').config();
-	const categoryId = Math.floor(Math.random() * 44) + 1;
+	const categoryId = crypto.randomInt(1, 44);
 	const maxResults = 1; // number of results to return
 	const maxTries = 5; // maximum number of retries
 
@@ -86,7 +49,6 @@ async function getRandomVideo() {
 	console.log(`Failed to retrieve data after ${maxTries} attempts`);
 	return 'https://www.youtube.com/embed/1fwJ8H5wWCU';
 }
-
 
 
 module.exports = {

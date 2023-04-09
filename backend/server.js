@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const app = express();
 const User = require('./models/user');
-const videoSchema = require('./models/video');
+
 
 const logger = require('./logger/logger');
 const cors = require('cors');
@@ -11,13 +11,11 @@ const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const Sequelize = require("sequelize");
 const sequelize = require('./config/database');
-const {
-	CronJob
-} = require('cron');
+
 // const {
 // 	addLinkToDatabase
 // } = require('./models/video');
-const randomVideo = require('./services/randomVideoService');
+
 
 sequelize.authenticate()
 	.then(() => {
@@ -31,16 +29,8 @@ sequelize.authenticate()
 		console.log(`Unable to connect to the database: ${error}`);
 	});
 
-
-
-
-
-
 //Cross Origin Resource Sharing
 app.use(cors());
-// app.use(morgan('combined', {
-// 	stream: logger.stream
-// }));
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
@@ -74,30 +64,6 @@ app.use(bodyParser.json());
 	}
 })();
 
-// Schedule cron job to update video every 24 hours
-const task = new CronJob('0 1 0 * * *', async () => {
-	let tries = 0;
-	let video = null;
-	while (!video && tries < 3) {
-		try {
-			video = await randomVideo.getRandomVideo();
-		} catch (error) {
-			console.error(error);
-			tries++;
-		}
-	}
-
-	if (video) {
-		try {
-			const result = await videoSchema.addLinkToDatabase(video);
-			console.log(`New video link has been added to the database: ${result.link}`);
-		} catch (error) {
-			console.error(error);
-		}
-	}
-
-}, null, true, 'Europe/Budapest');
-task.start();
 
 // Authentication middleware
 const authenticateJwt = require('./models/auth/authenticate');

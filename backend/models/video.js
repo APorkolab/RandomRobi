@@ -8,7 +8,7 @@ const videoSchema = db.define("videos", {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
-		allowNull: false, // <---- hozzáadva
+		allowNull: false,
 	},
 	link: {
 		type: Sequelize.STRING,
@@ -86,7 +86,7 @@ const getLastVideoLink = async () => {
 				['id', 'DESC']
 			],
 			attributes: ['id', 'link', 'createdAt']
-		});
+		}) || {};
 		if (video && video.link) {
 			return {
 				id: video.id,
