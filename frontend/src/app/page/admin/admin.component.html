@@ -24,9 +24,18 @@
 			<table class="table table-hover">
 				<thead>
 					<tr>
-						<th>ID</th>
-						<th>Link</th>
-						<th>Created At</th>
+						<th>ID
+							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('id')" name="Shuffle"></mat-icon>
+							<mat-icon svgIcon="arrow_downward" (click)="onColumnSelect('id')" name="Shuffle"></mat-icon>
+						</th>
+						<th>Link
+							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('link')" name="Shuffle"></mat-icon>
+							<mat-icon svgIcon="arrow_downward" (click)="onColumnSelect('link')" name="Shuffle"></mat-icon>
+						</th>
+						<th>Created At
+							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('createdAt')" name="Shuffle"></mat-icon>
+							<mat-icon svgIcon="arrow_downward" (click)="onColumnSelect('createdAt')" name="Shuffle"></mat-icon>
+						</th>
 						<th>Edit</th>
 						<th>Delete</th>
 					</tr>

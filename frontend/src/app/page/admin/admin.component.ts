@@ -82,4 +82,5 @@ export class AdminComponent implements OnInit {
       complete: () => alert('The new video has been created successfully.'),
     });
   }
+
 }

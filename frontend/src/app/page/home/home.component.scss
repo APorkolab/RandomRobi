@@ -83,9 +83,10 @@ footer {
   background-image: url("../../../assets/img/background.png");
   background-repeat: repeat;
   background-size: cover;
-
   overflow-y: hidden;
+  padding-bottom: $footer-height;
 }
+
 
 .logo-container {
   display: flex;
@@ -96,5 +97,19 @@ footer {
 
 .logo-container img {
   max-width: 100%;
-  height: 100px;
+  //  height: 100px;
+  width: 8rem;
+}
+
+.rrlogo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  height: auto;
+}
+
+.rrlogo-container img {
+  max-width: 100%;
+  height: auto;
 }

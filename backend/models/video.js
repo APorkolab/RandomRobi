@@ -24,9 +24,6 @@ const videoSchema = db.define("videos", {
 	timestamps: false,
 });
 
-
-
-
 const addLinkToDatabase = async (link, createdAt) => {
 	try {
 		if (!link) {
@@ -44,6 +41,7 @@ const addLinkToDatabase = async (link, createdAt) => {
 		throw err;
 	}
 };
+
 
 
 const getAllLinksFromDatabase = async () => {
@@ -114,22 +112,34 @@ const updateLinkInDatabase = async (id, {
 	link,
 	createdAt
 }) => {
-	const formattedDate = new Date(createdAt).toISOString().replace('T', ' ').slice(0, -5);
 	try {
+		let formattedDate;
+		if (createdAt) {
+			// Parse the provided date string into a date object
+			const dateObj = new Date(createdAt);
+			// Check if the date is valid and convert to ISO format
+			if (isNaN(dateObj.getTime())) {
+				throw new Error('Invalid date');
+			} else {
+				formattedDate = dateObj.toISOString().replace('T', ' ').slice(0, -5);
+			}
+		}
+
 		const result = await videoSchema.update({
-			link: link,
+			link,
 			createdAt: formattedDate
 		}, {
 			where: {
-				id: id
+				id
 			}
 		});
 		if (result[0] === 0) {
-			throw new Error("Video not found");
+			throw new Error('Video not found');
 		}
+
 		const video = await videoSchema.findOne({
 			where: {
-				id: id
+				id
 			},
 			attributes: ['id', 'link', 'createdAt']
 		});
@@ -142,6 +152,7 @@ const updateLinkInDatabase = async (id, {
 		throw err;
 	}
 };
+
 
 const deleteLinkFromDatabase = async (id) => {
 	try {

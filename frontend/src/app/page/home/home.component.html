@@ -15,17 +15,26 @@
 		<div class="main">
 			<div class="content">
 				<div class="container">
-					<h1 class="mt-5">RandomRobi,<br>the homie who drops you<br>a fresh YouTube video every day!</h1>
-
+					<div class="row align-items-center">
+						<!-- <div class="col-md-6">
+							<h1 class="mt-5 mb-4">RandomRobi,<br>the homie who drops you<br>a fresh YouTube video every day!</h1>
+						</div> -->
+						<div class="col-md-12 justify-content-md-end">
+							<div class="rrlogo-container">
+								<img src="../../../assets/img/rrlogo.png" alt="Logo" class="img-fluid">
+							</div>
+						</div>
+					</div>
 					<div class="video-container">
 						<iframe class="embed-responsive-item" [src]="link | safe" allowfullscreen></iframe>
 					</div>
 
-					<footer class="mt-5 mb-3 text-muted text-center">
-						©2023 <a href="https://www.pklab.hu">PKLab</a>
-						<div class="logo-container">
-							<img src="../../../assets/img/logo.png" alt="PKLab Logo">
-						</div>
+					<footer class="mt-5 mb-3 text-center text-muted">
+						©2023 <a href="https://www.pklab.hu">PKLab
+							<div class="logo-container">
+								<img src="../../../assets/img/logo.png" alt="PKLab Logo">
+							</div>
+						</a>
 					</footer>
 					<button class="btn btn-primary position-fixed bottom-0 start-0 rounded-0 px-3 py-2" *ngIf="showAdminButton"
 						style="opacity: 0.05;" (click)="onAdminClick()">Admin</button>

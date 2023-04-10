@@ -28,14 +28,26 @@ server.listen(port, () => {
 });
 
 // Schedule cron job to update video every 24 hours
-// const task = new CronJob('0 0 * * ', async () => {
-const task = new CronJob('1 0 * * *', async () => {
-	try {
-		const videoData = await randomVideo.getRandomVideo();
-		await database.addLinkToDatabase(videoData);
-	} catch (error) {
-		console.error(error);
+const task = new CronJob('0 1 0 * * *', async () => {
+	let tries = 0;
+	let video = null;
+	while (!video && tries < 3) {
+		try {
+			video = await randomVideo.getRandomVideo();
+		} catch (error) {
+			console.error(error);
+			tries++;
+		}
 	}
-}, null, true, 'Europe/Budapest');
 
+	if (video) {
+		try {
+			const result = await videoSchema.addLinkToDatabase(video);
+			console.log(`New video link has been added to the database: ${result.link}`);
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+}, null, true, 'Europe/Budapest');
 task.start();
