@@ -24,7 +24,7 @@ export class AdminComponent implements OnInit {
   filterKey: string = '';
   changeText = true;
   pageSize: number = 25;
-
+  lastPage = false;
   startSlice: number = 0;
   endSlice: number = 25;
   page: number = 1;
@@ -35,9 +35,13 @@ export class AdminComponent implements OnInit {
     { key: 'createdAt', title: 'Created At' }
   ];
   get pageList(): number[] {
-    const pageSize = Math.ceil(this.list.length / this.pageSize);
-    return new Array(pageSize).fill(1).map((x, i) => i + 1);
+    const pageCount = Math.ceil(this.list.length / this.pageSize);
+    const maxPageCount = Math.min(pageCount, 10);
+    const pages = new Array(maxPageCount).fill(1).map((x, i) => i + 1);
+    return pages;
   }
+
+
 
   columnKey: string = '';
   sortDir: number = -1;
@@ -50,6 +54,10 @@ export class AdminComponent implements OnInit {
 
   ngOnInit(): void {
     this.videos$ = this.videoService.getAll();
+    this.videos$.subscribe((videos) => {
+      this.list = videos;
+      this.updatePage();
+    });
   }
 
   editVideo(video: Video): void {
@@ -70,11 +78,21 @@ export class AdminComponent implements OnInit {
   }
 
   jumptoPage(pageNum: number): void {
+    const maxPage = Math.ceil(this.list.length / this.pageSize);
+    if (pageNum < 1 || pageNum > maxPage) {
+      return;
+    }
     this.page = pageNum;
-    this.startSlice = this.pageSize * (pageNum - 1);
-    this.endSlice = this.startSlice + this.pageSize;
+    this.updatePage();
   }
 
+  private updatePage(): void {
+    const maxPage = Math.ceil(this.list.length / this.pageSize);
+    this.startSlice = (this.page - 1) * this.pageSize;
+    this.endSlice = Math.min(this.startSlice + this.pageSize, this.list.length);
+    const pageList = new Array(maxPage).fill(1).map((x, i) => i + 1);
+    this.lastPage = this.page === pageList[pageList.length - 1];
+  }
   onCreate(video: Video) {
     this.videoService.create(video).subscribe({
       next: () => this.router.navigate(['/', 'admin']),

@@ -30,10 +30,8 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<input type="datetime-local" class="form-control" name="createdAtString" [(ngModel)]="createdAtString"
-									min="2000-01-01T00:00" max="2100-12-31T23:59" #created_at="ngModel">
-
-
+								<input type="datetime-local" class="form-control" name="createdAt" [(ngModel)]="createdAtString"
+									min="2000-01-01T00:00" max="2100-12-31T23:59">
 
 								<small class="form-text text-muted">If a timestamp is provided, the system will use that. If left empty,
 									the system will use the current timestamp.</small>

@@ -2,7 +2,7 @@ const randomVideo = require('../services/randomVideoService');
 const db = require("../config/database");
 
 const Sequelize = require("sequelize");
-
+const moment = require('moment');
 const videoSchema = db.define("videos", {
 	id: {
 		type: Sequelize.INTEGER,
@@ -41,8 +41,6 @@ const addLinkToDatabase = async (link, createdAt) => {
 		throw err;
 	}
 };
-
-
 
 const getAllLinksFromDatabase = async () => {
 	try {
@@ -108,46 +106,46 @@ const getLastVideoLink = async () => {
 	}
 };
 
-const updateLinkInDatabase = async (id, {
-	link,
-	createdAt
-}) => {
+const updateLinkInDatabase = async (updatedVideo) => {
 	try {
 		let formattedDate;
-		if (createdAt) {
-			// Parse the provided date string into a date object
-			const dateObj = new Date(createdAt);
-			// Check if the date is valid and convert to ISO format
-			if (isNaN(dateObj.getTime())) {
-				throw new Error('Invalid date');
+		if (updatedVideo.createdAt) {
+			const parsedDate = moment(updatedVideo.createdAt);
+			if (parsedDate.isValid()) {
+				formattedDate = parsedDate.format('YYYY-MM-DD HH:mm:ss');
 			} else {
-				formattedDate = dateObj.toISOString().replace('T', ' ').slice(0, -5);
+				throw new Error('Invalid date');
 			}
 		}
 
-		const result = await videoSchema.update({
-			link,
-			createdAt: formattedDate
-		}, {
-			where: {
-				id
-			}
-		});
-		if (result[0] === 0) {
+		const video = await videoSchema.findByPk(updatedVideo.id);
+		if (!video) {
 			throw new Error('Video not found');
 		}
 
-		const video = await videoSchema.findOne({
+		const [updatedRowsCount] = await videoSchema.update({
+			link: updatedVideo.link,
+			createdAt: formattedDate
+		}, {
 			where: {
-				id
-			},
-			attributes: ['id', 'link', 'createdAt']
+				id: updatedVideo.id
+			}
 		});
-		return {
-			id: video.id,
-			link: video.link,
-			createdAt: video.createdAt
-		};
+
+		if (updatedRowsCount < 1) {
+			throw new Error('Video not found or data not changed');
+		}
+
+		const updatedVideoFromDB = await videoSchema.findByPk(updatedVideo.id);
+
+		// Convert the createdAt date to the desired format
+		const updatedVideoJSON = updatedVideoFromDB.toJSON();
+		if (updatedVideoJSON.createdAt) {
+			const createdAtDateObj = new Date(updatedVideoJSON.createdAt);
+			updatedVideoJSON.createdAt = createdAtDateObj.toLocaleDateString();
+		}
+
+		return updatedVideoJSON;
 	} catch (err) {
 		throw err;
 	}

@@ -18,7 +18,8 @@ import { JwtInterceptor } from './service/jwt.interceptor';
 import { AuthService } from './service/auth.service';
 import { UserComponent } from './page/user/user.component';
 import { UserEditorComponent } from './page/user-editor/user-editor.component';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DatePipe } from '@angular/common';
 @NgModule({
   declarations: [
     AppComponent,
@@ -38,7 +39,8 @@ import { UserEditorComponent } from './page/user-editor/user-editor.component';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    MatIconModule
+    MatIconModule,
+    BrowserAnimationsModule
   ],
   providers: [
     {
@@ -47,6 +49,7 @@ import { UserEditorComponent } from './page/user-editor/user-editor.component';
       deps: [AuthService],
       multi: true,
     },
+    DatePipe
   ],
   bootstrap: [AppComponent]
 })

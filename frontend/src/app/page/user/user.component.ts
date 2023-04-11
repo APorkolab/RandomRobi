@@ -21,7 +21,7 @@ export class UserComponent implements OnInit {
   filterKey: string = '';
   changeText = true;
   pageSize: number = 25;
-
+  lastPage = false;
   startSlice: number = 0;
   endSlice: number = 25;
   page: number = 1;
@@ -37,10 +37,16 @@ export class UserComponent implements OnInit {
 
   ngOnInit(): void {
     this.users$ = this.userService.getAll();
+    this.users$.subscribe((users) => {
+      this.list = users;
+      this.updatePage();
+    });
   }
   get pageList(): number[] {
-    const pageSize = Math.ceil(this.list.length / this.pageSize);
-    return new Array(pageSize).fill(1).map((x, i) => i + 1);
+    const pageCount = Math.ceil(this.list.length / this.pageSize);
+    const maxPageCount = Math.min(pageCount, 10);
+    const pages = new Array(maxPageCount).fill(1).map((x, i) => i + 1);
+    return pages;
   }
 
   columnKey: string = '';
@@ -52,10 +58,22 @@ export class UserComponent implements OnInit {
   }
 
   jumptoPage(pageNum: number): void {
+    const maxPage = Math.ceil(this.list.length / this.pageSize);
+    if (pageNum < 1 || pageNum > maxPage) {
+      return;
+    }
     this.page = pageNum;
-    this.startSlice = this.pageSize * (pageNum - 1);
-    this.endSlice = this.startSlice + this.pageSize;
+    this.updatePage();
   }
+
+  private updatePage(): void {
+    const maxPage = Math.ceil(this.list.length / this.pageSize);
+    this.startSlice = (this.page - 1) * this.pageSize;
+    this.endSlice = Math.min(this.startSlice + this.pageSize, this.list.length);
+    const pageList = new Array(maxPage).fill(1).map((x, i) => i + 1);
+    this.lastPage = this.page === pageList[pageList.length - 1];
+  }
+
   editUser(user: User): void {
     this.router.navigate(['/', 'user', 'edit', user.id]);
   }

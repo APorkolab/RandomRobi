@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { Video } from 'src/app/model/video';
 import { VideoService } from 'src/app/service/video.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-video-editor',
@@ -11,7 +12,7 @@ import { VideoService } from 'src/app/service/video.service';
   styleUrls: ['./video-editor.component.scss']
 })
 export class VideoEditorComponent implements OnInit {
-  video$!: Observable<Video>;
+  video$!: Observable<Video | undefined>;
   video: Video = new Video();
   createdAtString = '';
 
@@ -19,9 +20,16 @@ export class VideoEditorComponent implements OnInit {
     private videoService: VideoService,
     private route: ActivatedRoute,
     private router: Router,
+    private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
+    const localTime = new Date();
+    const utcTime = new Date(localTime.getTime() + (localTime.getTimezoneOffset() * 60000));
+    this.createdAtString = this.datePipe.transform(utcTime, 'yyyy-MM-ddTHH:mm') || '';
+
+
+
     this.route.params.subscribe({
       next: (param) => {
         if (param['id'] == '0') {
@@ -36,7 +44,9 @@ export class VideoEditorComponent implements OnInit {
       next: (video) => {
         this.video = video ? video : this.video;
         const createdAtDate = new Date(Date.parse(this.video.createdAt));
-        this.createdAtString = createdAtDate.toISOString().substring(0, 16);
+        const timezoneOffset = new Date().getTimezoneOffset() * 60000;
+        const localTime = new Date(createdAtDate.getTime() - timezoneOffset);
+        this.createdAtString = this.datePipe.transform(localTime, 'yyyy-MM-ddTHH:mm', 'UTC') + '';
       },
     });
 
@@ -44,13 +54,15 @@ export class VideoEditorComponent implements OnInit {
   }
 
   onUpdate(video: Video) {
-    const date = new Date(this.createdAtString);
-    const utcDate = new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
-    video.createdAt = utcDate.toISOString();
-    this.videoService.update(video).subscribe({
+    const updatedVideo = new Video();
+    updatedVideo.id = video.id;
+    updatedVideo.link = this.video.link;
+    updatedVideo.createdAt = this.datePipe.transform(this.createdAtString, 'yyyy-MM-ddTHH:mm', 'UTC') + '';
+
+    this.videoService.update(updatedVideo).subscribe({
       next: () => this.router.navigate(['/', 'admin']),
       error: (err) => console.error(err),
-      complete: () => console.info("Update success"),
+      complete: () => alert('The user has been updated successfully.'),
     });
   }
 

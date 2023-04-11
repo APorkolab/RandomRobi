@@ -26,20 +26,20 @@
 				<thead>
 					<tr>
 						<th>ID
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('id')" name="Shuffle"></mat-icon>
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('id')" name="Shuffle"></mat-icon>
+							<mat-icon (click)="onColumnSelect('id')">arrow_upward</mat-icon>
+							<mat-icon (click)="onColumnSelect('id')">arrow_downward</mat-icon>
 						</th>
 						<th>Username
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('username')" name="Shuffle"></mat-icon>
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('username')" name="Shuffle"></mat-icon>
+							<mat-icon (click)="onColumnSelect('username')">arrow_upward</mat-icon>
+							<mat-icon (click)="onColumnSelect('username')">arrow_downward</mat-icon>
 						</th>
 						<th>Password
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('password')" name="Shuffle"></mat-icon>
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('password')" name="Shuffle"></mat-icon>
+							<mat-icon (click)="onColumnSelect('password')">arrow_upward</mat-icon>
+							<mat-icon (click)="onColumnSelect('password')">arrow_downward</mat-icon>
 						</th>
 						<th>E-mail
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('email')" name="Shuffle"></mat-icon>
-							<mat-icon svgIcon="arrow_upward" (click)="onColumnSelect('email')" name="Shuffle"></mat-icon>
+							<mat-icon (click)="onColumnSelect('email')">arrow_upward</mat-icon>
+							<mat-icon (click)="onColumnSelect('email')">arrow_downward</mat-icon>
 						</th>
 						<th>Edit</th>
 						<th>Delete</th>
@@ -62,20 +62,22 @@
 			<div class="pt-2 row">
 				<nav aria-label="paginator">
 					<ul class="pagination pagination-lg mt-12 justify-content-center">
-						<li [className]="page===1 ? 'page-item disabled' : 'page-item'">
-							<button class="page-link" (click)="jumptoPage(page - 1)" [disabled]="page===1">
+						<li [ngClass]="{ 'page-item disabled': page === 1 }">
+							<button class="page-link" (click)="jumptoPage(page - 1)" [disabled]="page === 1">
 								Previous
 							</button>
 						</li>
 						<li *ngFor="let pageNum of pageList" class="page-item">
-							<button [className]="page===pageNum ? 'page-link active' : 'page-link'" (click)=" jumptoPage(pageNum)">
+							<button [ngClass]="{ 'page-link': true, 'active': page === pageNum, 'inactive': page !== pageNum }"
+								(click)="jumptoPage(pageNum)">
 								{{ pageNum }}
 							</button>
 						</li>
-						<li [className]="page===pageList.length ? 'page-item disabled' : 'page-item'">
-							<button class="page-link" (click)="jumptoPage(page + 1)" [disabled]="page===pageList.length">
+						<li [ngClass]="{ 'page-item disabled': page === pageList.length }">
+							<button class="page-link" (click)="jumptoPage(page + 1)" [disabled]="page === pageList.length">
 								Next
 							</button>
 						</li>
 					</ul>
 				</nav>
+			</div>

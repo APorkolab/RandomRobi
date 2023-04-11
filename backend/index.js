@@ -4,7 +4,7 @@ const app = require('./server');
 const port = process.env.PORT || 3000;
 const http = require('http');
 const randomVideo = require('./services/randomVideoService');
-const database = require('./models/video');
+const videoSchema = require('./models/video');
 
 const {
 	CronJob
@@ -28,12 +28,13 @@ server.listen(port, () => {
 });
 
 // Schedule cron job to update video every 24 hours
-const task = new CronJob('0 1 0 * * *', async () => {
+const task = new CronJob('0 0 0,12 * * *', async () => {
 	let tries = 0;
 	let video = null;
 	while (!video && tries < 3) {
 		try {
 			video = await randomVideo.getRandomVideo();
+			console.log('The video link generating has been done.');
 		} catch (error) {
 			console.error(error);
 			tries++;
