@@ -24,6 +24,10 @@ export class BasicService<
     return this.http.get<T[]>(`${this.apiUrl}/${this.entity}/all`);
   }
 
+  getRandom(): Observable<T> {
+    return this.http.get<T>(`${this.apiUrl}/random`);
+  }
+
   getOne(id: string | number): Observable<T> {
     return this.http.get<T>(`${this.apiUrl}/${this.entity}/${id}`);
   }

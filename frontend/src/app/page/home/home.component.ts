@@ -32,4 +32,11 @@ export class HomeComponent implements OnInit {
   onAdminClick() {
     this.router.navigate(['/', 'admin']);
   }
+
+  getRandomVideo() {
+    this.videoService.getRandom().subscribe(video => {
+      this.link = video.link;
+    });
+  }
+
 }
