@@ -3,6 +3,9 @@ const db = require("../config/database");
 
 const Sequelize = require("sequelize");
 const moment = require('moment');
+const {
+	time
+} = require('cron');
 const videoSchema = db.define("videos", {
 	id: {
 		type: Sequelize.INTEGER,
@@ -23,6 +26,26 @@ const videoSchema = db.define("videos", {
 	freezeTableName: true,
 	timestamps: false,
 });
+
+const generateRandomLink = async () => {
+	try {
+		const videoObject = await randomVideo.getRandomVideo();
+
+		// Database storing. Feature if the users requests will be analyzed
+		// const newVideo = await addLinkToDatabase(videoObject, Date.now());
+
+		// Convert the createdAt date to the desired format
+		const newVideoJSON = JSON.parse(JSON.stringify(newVideo));
+		if (newVideoJSON.createdAt) {
+			const createdAtDateObj = new Date(newVideoJSON.createdAt);
+			newVideoJSON.createdAt = createdAtDateObj.toLocaleDateString();
+		}
+
+		return newVideoJSON;
+	} catch (err) {
+		throw new Error(`Hiba a videó link generálása közben: ${err.message}`);
+	}
+};
 
 const addLinkToDatabase = async (link, createdAt) => {
 	try {
@@ -173,6 +196,7 @@ module.exports = {
 	getLastVideoLink,
 	updateLinkInDatabase,
 	deleteLinkFromDatabase,
+	generateRandomLink
 };
 
 return videoSchema;

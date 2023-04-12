@@ -6,9 +6,7 @@ const http = require('http');
 const randomVideo = require('./services/randomVideoService');
 const videoSchema = require('./models/video');
 
-const {
-	CronJob
-} = require('cron');
+const cron = require('node-cron');
 const server = http.createServer(app);
 
 const result = dotenv.config();
@@ -23,12 +21,11 @@ if (!process.env.API_KEY || !process.env.DB_HOST || !process.env.DB_USER || !pro
 	process.exit(1);
 }
 
-server.listen(port, () => {
-	console.log(`App listening at http://localhost:${port}`);
-});
 
-// Schedule cron job to update video every 24 hours
-const task = new CronJob('0 0 0,12 * * *', async () => {
+// const task = cron.schedule('0 0 0,12 * * *', async () => {
+
+const task = cron.schedule('*/30 * * * * *', async () => {
+	console.log('Tarara!');
 	let tries = 0;
 	let video = null;
 	while (!video && tries < 3) {
@@ -52,3 +49,7 @@ const task = new CronJob('0 0 0,12 * * *', async () => {
 
 }, null, true, 'Europe/Budapest');
 task.start();
+
+server.listen(port, () => {
+	console.log(`App listening at http://localhost:${port}`);
+});

@@ -45,10 +45,6 @@ router.put('/:id', async (req, res) => {
 });
 
 
-
-
-
-
 router.get('/:id', async (req, res, next) => {
 	const id = req.params.id;
 	try {
