@@ -29,23 +29,25 @@ const videoSchema = db.define("videos", {
 
 const generateRandomLink = async () => {
 	try {
-		const videoObject = await randomVideo.getRandomVideo();
+		const videoLink = JSON.stringify(await randomVideo.getRandomVideo());
+		let newVideo = null;
 
 		// Database storing. Feature if the users requests will be analyzed
-		// const newVideo = await addLinkToDatabase(videoObject, Date.now());
+		// newVideo = await addLinkToDatabase(videoLink, Date.now());
 
-		// Convert the createdAt date to the desired format
-		const newVideoJSON = JSON.parse(JSON.stringify(newVideo));
-		if (newVideoJSON.createdAt) {
-			const createdAtDateObj = new Date(newVideoJSON.createdAt);
-			newVideoJSON.createdAt = createdAtDateObj.toLocaleDateString();
+		if (newVideo) {
+			videoLink = newVideo;
 		}
 
-		return newVideoJSON;
+		return {
+			link: videoLink
+		};
 	} catch (err) {
 		throw new Error(`Hiba a videó link generálása közben: ${err.message}`);
 	}
 };
+
+
 
 const addLinkToDatabase = async (link, createdAt) => {
 	try {

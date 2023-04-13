@@ -35,8 +35,9 @@ export class HomeComponent implements OnInit {
 
   getRandomVideo() {
     this.videoService.getRandom().subscribe(video => {
-      this.link = video.link;
+      this.link = video.link.slice(1, -1); // videó link első és utolsó karaktereinek kivágása
     });
   }
+
 
 }
