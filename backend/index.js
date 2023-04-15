@@ -20,7 +20,12 @@ if (!process.env.API_KEY || !process.env.DB_HOST || !process.env.DB_USER || !pro
 	process.exit(1);
 }
 
-app.get('/cron', cron.task);
+app.get('/cron', (req, res) => {
+	// Az időzített feladatok konfigurálása
+	cron.task();
+	// Válasz küldése a kliensnek
+	res.status(204).send();
+});
 
 server.listen(port, () => {
 	console.log(`App listening at http://localhost:${port}`);
