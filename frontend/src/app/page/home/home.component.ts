@@ -13,6 +13,8 @@ import { map } from 'rxjs/operators';
 export class HomeComponent implements OnInit {
   video$: Observable<Video> = this.videoService.getLatest();
   link = '';
+  isPlaying = false;
+  isLoaded = false;
   showAdminButton = false;
   entity: string = 'Video';
 
@@ -36,7 +38,38 @@ export class HomeComponent implements OnInit {
   getRandomVideo() {
     this.videoService.getRandom().subscribe(video => {
       this.link = video.link.slice(1, -1); // videó link első és utolsó karaktereinek kivágása
+      this.isPlaying = false;
     });
+  }
+
+  onLoad() {
+    console.log('Video loaded.');
+    this.isPlaying = true;
+    this.isLoaded = true;
+  }
+
+  onEnded() {
+    console.log('Video ended.');
+    this.isPlaying = false;
+    this.isLoaded = false;
+  }
+  onPause() {
+    console.log('Video paused');
+    this.isPlaying = false;
+  }
+
+  onError() {
+    console.log('Error loading video.');
+    this.isPlaying = false;
+    this.isLoaded = false;
+  }
+
+  getButtonText(): string {
+    return this.isPlaying ? 'Weird sh*t generator disabled' : 'Gimme some weird YT sh*t, dude!';
+  }
+
+  getButtonClass(): string {
+    return this.isPlaying ? 'btn-outline-dark btn-sm' : 'btn-dark';
   }
 
 

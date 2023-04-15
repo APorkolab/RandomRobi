@@ -31,20 +31,28 @@
 					<button class="btn btn-dark btn-lg btn-block mt-5 fw-bold" (click)="getRandomVideo()">Gimme some weird YT
 						sh*t,
 						dude!</button>
-
-					<footer class="mt-5 mb-3 text-center text-muted">
-						©2023 <a href="https://www.pklab.hu">PKLab
-							<div class="logo-container">
-								<img src="../../../assets/img/logo.png" alt="PKLab Logo">
-							</div>
-						</a>
-					</footer>
-					<button class="btn btn-primary position-fixed bottom-0 start-0 rounded-0 px-3 py-2" *ngIf="showAdminButton"
-						style="opacity: 0.05;" (click)="onAdminClick()">Admin</button>
+					<div class="mt-2 text-warning">
+						<div class="fw-bold">
+							New random video generating is not available while a video is playing...
+						</div>
+						(even if you keep pressing the
+						button recklessly
+						at the wrong time.)
+					</div>
 				</div>
+				<footer class="mt-5 mb-3 text-center text-muted">
+					©2023 <a href="https://www.pklab.hu">PKLab
+						<div class="logo-container">
+							<img src="../../../assets/img/logo.png" alt="PKLab Logo">
+						</div>
+					</a>
+				</footer>
+				<button class="btn btn-primary position-fixed bottom-0 start-0 rounded-0 px-3 py-2" *ngIf="showAdminButton"
+					style="opacity: 0.05;" (click)="onAdminClick()">Admin</button>
 			</div>
 		</div>
 	</div>
+
 </body>
 
 </html>
