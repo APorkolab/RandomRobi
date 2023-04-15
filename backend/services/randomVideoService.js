@@ -4,15 +4,12 @@ const crypto = require('crypto');
 
 const express = require('express');
 // const router = express.Router();
-// const BASE_API_URL = "https://www.googleapis.com/youtube/v3/search";
-
-
-
+const BASE_API_URL = "https://www.googleapis.com/youtube/v3/search";
 
 const MAX_RESULTS = 1; // number of results to return
 const MAX_TRIES = 5; // maximum number of retries
 const RETRY_DELAY = 1000; // delay between retries in milliseconds
-const BASE_API_URL = "https://youtube.googleapis.com/youtube/v3/search";
+// const BASE_API_URL = "https://youtube.googleapis.com/youtube/v3/search";
 let isGeneratingVideo = false;
 
 async function getRandomVideo() {

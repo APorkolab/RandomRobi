@@ -47,8 +47,6 @@ const generateRandomLink = async () => {
 	}
 };
 
-
-
 const addLinkToDatabase = async (link, createdAt) => {
 	try {
 		if (!link) {
