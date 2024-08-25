@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -17,7 +16,7 @@ export class BasicService<
   constructor(private http: HttpClient) { }
 
   getLatest(): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/`);
+    return this.http.get<T>(`${this.apiUrl}/${this.entity}/latest`);
   }
 
   getAll(): Observable<T[]> {
@@ -25,7 +24,7 @@ export class BasicService<
   }
 
   getRandom(): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/random`);
+    return this.http.get<T>(`${this.apiUrl}/${this.entity}/random`);
   }
 
   getOne(id: string | number): Observable<T> {

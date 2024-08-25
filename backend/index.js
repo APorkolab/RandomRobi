@@ -1,56 +1,79 @@
-const dotenv = require('dotenv');
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const logger = require('./logger/logger');
-const app = require('./server');
+const sequelize = require('./config/database');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const app = express();
 const port = process.env.PORT || 3000;
-const http = require('http');
 
+// Swagger configuration
+const swaggerOptions = {
+	swaggerDefinition: {
+		openapi: "3.0.0",
+		info: {
+			title: "Random Robi API",
+			version: "1.0.0",
+			description: "API documentation for the Random Robi project",
+			contact: {
+				name: "Adam",
+				email: "adam@example.com"
+			}
+		},
+		servers: [{
+			url: "http://localhost:3000",
+			description: "Local server"
+		}]
+	},
+	apis: ["./routes/*.js", "./controllers/**/*.js"] // Swagger dokumentáció forrása
+};
 
-const cron = require('./services/cronService');
-const {
-	timeStamp
-} = require('console');
-const server = http.createServer(app);
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-const result = dotenv.config();
+// Middleware setup
+app.use(cors());
+app.use(bodyParser.urlencoded({
+	extended: false
+}));
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
-if (result.error) {
-	logger.error(result.error);
-	process.exit(1);
-}
+// Route imports
+const videoRouter = require('./controllers/video/router');
+const cronRouter = require('./controllers/cron/router');
+const userRouter = require('./controllers/user/router');
+const loginRouter = require('./controllers/login/router');
 
-if (!process.env.API_KEY || !process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD) {
-	logger.error('Database credentials not found in environment variables.');
-	process.exit(1);
-}
+// Routes setup
+app.use('/video', videoRouter);
+app.use('/cron', cronRouter);
+app.use('/user', require('./models/auth/authenticate'), userRouter);
+app.use('/login', loginRouter);
 
+// Global error handler
+app.use((err, req, res, next) => {
+	logger.error(`Error: ${err.message}`);
+	res.status(500).json({
+		hasError: true,
+		message: err.message
+	});
+});
 
-app.get('/cron', (req, res) => {
-	const options = {
-		timeZone: 'Europe/Budapest',
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit',
-		hour: '2-digit',
-		minute: '2-digit'
-	};
-	// Az időzített feladatok konfigurálása
-	cron.cronJob()
-		.then(() => {
-			const formattedDate = new Date().toLocaleString('hu-HU', options);
-			res.status(204).send(`The cronjob has been successfully applied at ${formattedDate}`);
-			res.end();
-		})
-		.catch((err) => {
-			console.error(err);
-			const formattedDate = new Date().toLocaleString('hu-HU', options);
-			res.status(500).send(`Something went wrong at ${formattedDate}`);
-			res.end();
+// Database connection and server start
+sequelize.authenticate()
+	.then(async () => {
+		logger.info('Connected to the database.');
+		await sequelize.sync();
+		logger.info('All models synced.');
+		app.listen(port, () => {
+			logger.info(`App listening at http://localhost:${port}`);
 		});
-});
+	})
+	.catch((error) => {
+		logger.error(`Unable to connect to the database: ${error.message}`);
+		process.exit(1);
+	});
 
-
-
-
-server.listen(port, () => {
-	console.log(`App listening at http://localhost:${port}`);
-});
+module.exports = app;

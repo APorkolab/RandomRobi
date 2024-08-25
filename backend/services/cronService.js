@@ -1,33 +1,17 @@
-const randomVideo = require('../services/randomVideoService');
-const videoSchema = require('../models/video');
+const cron = require('node-cron');
+const {
+	generateAndStoreRandomVideo
+} = require('./videoService');
+const logger = require('./logger');
 
-const cronJob = async () => {
+// Ütemezett feladat minden 12 órában
+cron.schedule('0 0 */12 * * *', async () => {
 	try {
-		let tries = 0;
-		let video = null;
-		while (!video && tries < 3) {
-			try {
-				video = await randomVideo.getRandomVideo();
-				console.log('Video link generation successful.');
-				if (video) {
-					try {
-						const result = await videoSchema.addLinkToDatabase(video);
-						console.log(`New video link added to database: ${result.link}`);
-					} catch (error) {
-						console.error(error);
-					}
-				}
-			} catch (err) {
-				console.error(err.message);
-			}
-			tries++;
-		}
-	} catch (err) {
-		console.error(err.message);
+		await generateAndStoreRandomVideo();
+		logger.info('Cron job successfully executed');
+	} catch (error) {
+		logger.error('Error running cron job:', error);
 	}
-};
+});
 
-
-module.exports = {
-	cronJob
-};
+module.exports = cron;

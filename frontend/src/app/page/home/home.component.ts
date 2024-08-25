@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit {
 
   getRandomVideo() {
     this.videoService.getRandom().subscribe(video => {
-      this.link = video.link.slice(1, -1); // videó link első és utolsó karaktereinek kivágása
+      this.link = video.link;
       this.isPlaying = false;
     });
   }
@@ -53,6 +53,7 @@ export class HomeComponent implements OnInit {
     this.isPlaying = false;
     this.isLoaded = false;
   }
+
   onPause() {
     console.log('Video paused');
     this.isPlaying = false;
@@ -62,6 +63,8 @@ export class HomeComponent implements OnInit {
     console.log('Error loading video.');
     this.isPlaying = false;
     this.isLoaded = false;
+    // Try to fetch another video if there's an error
+    this.getRandomVideo();
   }
 
   getButtonText(): string {
@@ -71,6 +74,4 @@ export class HomeComponent implements OnInit {
   getButtonClass(): string {
     return this.isPlaying ? 'btn-outline-dark btn-sm' : 'btn-dark';
   }
-
-
 }

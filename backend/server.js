@@ -1,47 +1,13 @@
-const express = require('express');
-require('dotenv').config();
-const app = express();
-const User = require('./models/user');
-
-
-const logger = require('./logger/logger');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
+const app = require('./index');
 const bcrypt = require('bcrypt');
-const bodyParser = require('body-parser');
-const Sequelize = require("sequelize");
-const sequelize = require('./config/database');
+const User = require('./models/user');
+const logger = require('./logger/logger');
 
-// const {
-// 	addLinkToDatabase
-// } = require('./models/video');
-
-
-sequelize.authenticate()
-	.then(() => {
-		console.log('Connected to database.');
-		return sequelize.sync();
-	})
-	.then(() => {
-		console.log('All models synced.');
-	})
-	.catch((error) => {
-		console.log(`Unable to connect to the database: ${error}`);
-	});
-
-//Cross Origin Resource Sharing
-app.use(cors());
-app.use(bodyParser.urlencoded({
-	extended: false
-}));
-app.use(express.static('public'));
-app.use(bodyParser.json());
-
-// create admin U
+// Create admin user on server start
 (async () => {
-	const username = 'admin';
-	const email = 'tarara@tarara.hu';
-	const password = 'tarara';
+	const username = process.env.ADMIN_USERNAME || 'admin';
+	const email = process.env.ADMIN_EMAIL || 'admin@example.com';
+	const password = process.env.ADMIN_PASSWORD || 'adminPassword';
 	const hashedPassword = await bcrypt.hash(password, 10);
 
 	try {
@@ -50,35 +16,15 @@ app.use(bodyParser.json());
 				username
 			}
 		});
-
 		if (!user) {
 			await User.create({
 				username,
 				password: hashedPassword,
 				email
 			});
-			console.log(`Admin user has been added with username: ${username}, email: ${email}`);
+			logger.info(`Admin user created with username: ${username}, email: ${email}`);
 		}
 	} catch (err) {
-		console.error(err);
+		logger.error(`Failed to create admin user: ${err.message}`);
 	}
 })();
-
-
-// Authentication middleware
-const authenticateJwt = require('./models/auth/authenticate');
-
-app.use('/video', authenticateJwt, require('./controllers/video/router'));
-app.use('/user', authenticateJwt, require('./controllers/user/router'));
-app.use('/login', require('./controllers/login/router'));
-app.use('/', require('./controllers/video/default_router'));
-
-app.use((err, req, res, next) => {
-	res.status(500);
-	res.json({
-		hasError: true,
-		message: err.message,
-	});
-});
-
-module.exports = app;
