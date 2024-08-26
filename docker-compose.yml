@@ -12,15 +12,12 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - randomrobi-network
-    # Ha nincs szükség a gazdagépen történő port kitettségre, ezt a rész elhagyható:
-    # ports:
-    #   - '3306:3306'
 
   randomrobi-backend:
     build:
       context: ./backend
     ports:
-      - '0:3000'
+      - '3000'
     environment:
       DB_HOST: randomrobi-db
       DB_PORT: 3306
@@ -36,7 +33,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - '0:80'
+      - '80'
     networks:
       - randomrobi-network
 
