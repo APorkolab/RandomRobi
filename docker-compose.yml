@@ -10,8 +10,10 @@ services:
       MYSQL_ROOT_PASSWORD: rootsecurepassword456
     volumes:
       - db_data:/var/lib/mysql
+      - ./backend/my.cnf:/etc/mysql/my.cnf
     networks:
       - randomrobi-network
+    command: --default-authentication-plugin=mysql_native_password
 
   randomrobi-backend:
     build:
