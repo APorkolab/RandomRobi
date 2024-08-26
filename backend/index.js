@@ -26,7 +26,7 @@ const swaggerOptions = {
 			description: "Local server"
 		}]
 	},
-	apis: ["./routes/*.js", "./controllers/**/*.js"] // Swagger dokumentáció forrása
+	apis: ["./routes/*.js", "./controllers/**/*.js"]
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -61,19 +61,26 @@ app.use((err, req, res, next) => {
 	});
 });
 
-// Database connection and server start
-sequelize.authenticate()
-	.then(async () => {
+// Function to start the server
+const startServer = async () => {
+	try {
+		await sequelize.authenticate();
 		logger.info('Connected to the database.');
+
 		await sequelize.sync();
 		logger.info('All models synced.');
+
 		app.listen(port, () => {
 			logger.info(`App listening at http://localhost:${port}`);
 		});
-	})
-	.catch((error) => {
-		logger.error(`Unable to connect to the database: ${error.message}`);
+	} catch (error) {
+		logger.error(`Unable to start the server: ${error.message}`);
 		process.exit(1);
-	});
+	}
+};
 
-module.exports = app;
+// Export the app and startServer function
+module.exports = {
+	app,
+	startServer
+};
