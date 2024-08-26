@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
     ports:
-      - '3000:3000'
+      - '0:3000'
     environment:
       DB_HOST: randomrobi-db
       DB_PORT: 3306
@@ -35,7 +35,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - '80:80'
+      - '0:80'
     networks:
       - randomrobi-network
 
