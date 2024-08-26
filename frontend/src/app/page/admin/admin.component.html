@@ -1,7 +1,9 @@
 <div class="container-fluid">
 	<div class="row">
-		<button *ngIf="(user$ | async)" routerLink="/login" type="button" class="btn btn-danger mb-2">Sign out</button>
-		<button *ngIf="!(user$ | async)" routerLink="/login" type="button" class="btn btn-info mb-2">Sign in</button>
+		<button *ngIf="(isUserLoggedIn$ | async)" routerLink="/login" type="button" class="btn btn-danger mb-2">Sign
+			out</button>
+		<button *ngIf="!(isUserLoggedIn$ | async)" routerLink="/login" type="button" class="btn btn-info mb-2">Sign
+			in</button>
 		<button class="btn btn-primary" [routerLink]="'/edit/0'">Create</button>
 		<button routerLink="/users" type="button" class="btn btn-dark">Go to User Page</button>
 		<div class="col-md-12 justify-content-center">
@@ -12,9 +14,7 @@
 					<div class="input-group mb-3">
 						<select [(ngModel)]="filterKey" id="tableSearch" class="form-select col-md-3">
 							<option value="">Search in every column</option>
-							<option *ngFor="let key of columns" [selected]="key.title === filterKey" [value]="key.title">
-								{{ key.title }}
-							</option>
+							<option *ngFor="let key of columns" [value]="key.key">{{ key.title }}</option>
 						</select>
 						<input [(ngModel)]="phrase" type="text" class="form-control col-md-9" placeholder="Search in the data...">
 					</div>
@@ -24,27 +24,19 @@
 			<table class="table table-hover">
 				<thead>
 					<tr>
-						<th>ID
-							<mat-icon (click)="onColumnSelect('id')">arrow_upward</mat-icon>
-							<mat-icon (click)="onColumnSelect('id')">arrow_downward</mat-icon>
-						</th>
-						<th>Link
-							<mat-icon (click)="onColumnSelect('link')">arrow_upward</mat-icon>
-							<mat-icon (click)="onColumnSelect('link')">arrow_downward</mat-icon>
-						</th>
-						<th>Created At
-							<mat-icon (click)="onColumnSelect('createdAt')">arrow_upward</mat-icon>
-							<mat-icon (click)="onColumnSelect('createdAt')">arrow_downward</mat-icon>
-						</th>
+						<th>ID</th>
+						<th>Link</th>
+						<th>Created At</th>
 						<th>Edit</th>
 						<th>Delete</th>
 					</tr>
 				</thead>
-
 				<tbody *ngIf="videos$ | async as videos">
 					<tr
-						*ngFor="let video of videos | slice: startSlice:endSlice | filter:phrase:keys[filterKey] | sort:columnKey:sortDir">
-						<td *ngFor="let col of columns">{{ video[col.key] }}</td>
+						*ngFor="let video of videos | slice: startSlice:endSlice | filter:phrase:filterKey | sorter:columnKey:sortDir">
+						<td>{{ video.id }}</td>
+						<td>{{ video.link }}</td>
+						<td>{{ video.createdAt | date:'short' }}</td>
 						<td><button class="btn btn-primary" (click)="editVideo(video)">Edit</button></td>
 						<td><button class="btn btn-danger" (click)="deleteVideo(video)">Delete</button></td>
 					</tr>
@@ -54,23 +46,20 @@
 			<div class="pt-2 row">
 				<nav aria-label="paginator">
 					<ul class="pagination pagination-lg mt-12 justify-content-center">
-						<li [ngClass]="{ 'page-item disabled': page === 1 }">
-							<button class="page-link" (click)="jumptoPage(page - 1)" [disabled]="page === 1">
-								Previous
-							</button>
+						<li class="page-item" [ngClass]="{ 'disabled': page === 1 }">
+							<button class="page-link" (click)="jumptoPage(page - 1)" [disabled]="page === 1">Previous</button>
 						</li>
 						<li *ngFor="let pageNum of pageList" class="page-item">
-							<button [ngClass]="{ 'page-link': true, 'active': page === pageNum, 'inactive': page !== pageNum }"
-								(click)="jumptoPage(pageNum)">
-								{{ pageNum }}
-							</button>
+							<button class="page-link" [ngClass]="{ 'active': page === pageNum }" (click)="jumptoPage(pageNum)">{{
+								pageNum }}</button>
 						</li>
-						<li [ngClass]="{ 'page-item disabled': page === pageList.length }">
-							<button class="page-link" (click)="jumptoPage(page + 1)" [disabled]="page === pageList.length">
-								Next
-							</button>
+						<li class="page-item" [ngClass]="{ 'disabled': page === pageList.length }">
+							<button class="page-link" (click)="jumptoPage(page + 1)"
+								[disabled]="page === pageList.length">Next</button>
 						</li>
-
 					</ul>
 				</nav>
 			</div>
+		</div>
+	</div>
+</div>

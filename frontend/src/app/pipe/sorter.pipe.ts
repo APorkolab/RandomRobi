@@ -1,31 +1,26 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'sort',
+  name: 'sorter',
+  pure: true
 })
 export class SorterPipe implements PipeTransform {
-  transform(value: any[] | null, key: string, dir: number = 1): any[] | null {
+  transform(value: any[], key: string, ascending: boolean = true): any[] {
     if (!Array.isArray(value) || !key) {
       return value;
     }
+
     return value.sort((a, b) => {
-      let first = a[key];
-      let second = b[key];
+      const aValue = a[key];
+      const bValue = b[key];
 
-      if (typeof a[key] === 'number' && typeof b[key] === 'number') {
-        return (a[key] - b[key]) * dir;
-      } else {
-        if (typeof first === 'object' && typeof second === 'object') {
-          first = Object.values(first).join('');
-          second = Object.values(second).join('');
-        }
-
-        return (
-          ('' + first)
-            .toLowerCase()
-            .localeCompare(('' + second).toLowerCase()) * dir
-        );
+      if (aValue < bValue) {
+        return ascending ? -1 : 1;
       }
+      if (aValue > bValue) {
+        return ascending ? 1 : -1;
+      }
+      return 0;
     });
   }
 }

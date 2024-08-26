@@ -4,62 +4,44 @@
 			<div class="card-header card-header-primary">
 				<h4 class="card-title" *ngIf="user$ | async">Edit the data of the admin</h4>
 				<h4 class="card-title" *ngIf="!(user$ | async)">Add a new admin</h4>
-
 			</div>
 			<div class="card-body">
-				<form #videoForm="ngForm">
+				<form #userForm="ngForm">
 					<input type="hidden" name="id" [(ngModel)]="user.id">
+
 					<h3 class="h5 text-secondary">Username *</h3>
-					<div class="row">
-						<div class="col-md-12">
-							<div class="form-group">
-								<input type="text" class="form-control" name="username" [(ngModel)]="user.username" required
-									minlength="5" maxlength="20">
-							</div>
-							<div [hidden]="videoForm.controls['username'].valid" class="alert alert-danger" role="alert">
-								The username must be between 5 and 20 characters long!
-							</div>
+					<div class="form-group">
+						<input type="text" class="form-control" name="username" [(ngModel)]="user.username" required minlength="5"
+							maxlength="20">
+						<div *ngIf="userForm.controls['username']?.invalid && userForm.controls['username']?.touched"
+							class="alert alert-danger" role="alert">
+							The username must be between 5 and 20 characters long!
 						</div>
 					</div>
 
 					<h3 class="h5 text-secondary">Password *</h3>
-					<div class="row">
-						<div class="col-md-12">
-							<div class="form-group">
-								<input type="password" class="form-control" name="password" [(ngModel)]="user.password" required
-									minlength="6" maxlength="60">
-							</div>
-							<div [hidden]="videoForm.controls['password'].valid" class="alert alert-danger" role="alert">
-								The password must be between 6 and 60 characters long!
-							</div>
+					<div class="form-group">
+						<input type="password" class="form-control" name="password" [(ngModel)]="user.password" required
+							minlength="6" maxlength="60">
+						<div *ngIf="userForm.controls['password']?.invalid && userForm.controls['password']?.touched"
+							class="alert alert-danger" role="alert">
+							The password must be between 6 and 60 characters long!
 						</div>
 					</div>
 
 					<h3 class="h5 text-secondary">Email</h3>
-					<div class="row">
-						<div class="col-md-12">
-							<div class="form-group">
-								<input type="email" class="form-control" name="email" [(ngModel)]="user.email">
-							</div>
-						</div>
+					<div class="form-group">
+						<input type="email" class="form-control" name="email" [(ngModel)]="user.email">
 					</div>
 
-					<button *ngIf="user$ | async" (click)="onUpdate(user)" [disabled]="videoForm.invalid" type="submit"
-						class="btn btn-primary pull-right me-md-3">Update
-						data of admin</button>
-					<button *ngIf="!(user$ | async)" (click)="onCreate(user)" [disabled]="videoForm.invalid" type="submit"
-						class="btn btn-primary pull-right me-md-3">Create
-						data of admin</button>
-					<button routerLink="/users" type="button" class="btn btn-danger pull-left">Cancel
-						edit</button>
+					<button *ngIf="user$ | async" (click)="onSave()" [disabled]="userForm.invalid" type="submit"
+						class="btn btn-primary pull-right me-md-3">Update data of admin</button>
+					<button *ngIf="!(user$ | async)" (click)="onSave()" [disabled]="userForm.invalid" type="submit"
+						class="btn btn-primary pull-right me-md-3">Create data of admin</button>
+					<button routerLink="/users" type="button" class="btn btn-danger pull-left">Cancel edit</button>
 					<div class="clearfix"></div>
-
 				</form>
-
 			</div>
 		</div>
-	</div>
-	<div class="col-md-4">
-
 	</div>
 </div>

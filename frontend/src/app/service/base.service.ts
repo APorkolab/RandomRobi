@@ -1,49 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
-export class BasicService<
-  T extends { id: string | number;[key: string]: any }
-> {
-  apiUrl: string = environment.apiUrl;
-  entity: string = '';
-  list$: BehaviorSubject<T[]> = new BehaviorSubject<T[]>([]);
+export class BaseService {
+  constructor(protected http: HttpClient) { }
 
-  constructor(private http: HttpClient) { }
-
-  getLatest(): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/${this.entity}/latest`);
+  protected get<T>(url: string) {
+    return this.http.get<T>(url);
   }
 
-  getAll(): Observable<T[]> {
-    return this.http.get<T[]>(`${this.apiUrl}/${this.entity}/all`);
+  protected post<T>(url: string, data: any) {
+    return this.http.post<T>(url, data);
   }
 
-  getRandom(): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/${this.entity}/random`);
+  protected put<T>(url: string, data: any) {
+    return this.http.put<T>(url, data);
   }
 
-  getOne(id: string | number): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/${this.entity}/${id}`);
-  }
-
-  create(entity: T): Observable<T> {
-    const newEntity = { ...entity, id: null };
-    return this.http.post<T>(`${this.apiUrl}/${this.entity}/`, newEntity);
-  }
-
-  update(entity: T): Observable<T> {
-    return this.http.put<T>(
-      `${this.apiUrl}/${this.entity}/${entity.id}`,
-      entity
-    );
-  }
-
-  delete(entity: T): Observable<T> {
-    return this.http.delete<T>(`${this.apiUrl}/${this.entity}/${entity.id}`);
+  protected delete<T>(url: string) {
+    return this.http.delete<T>(url);
   }
 }

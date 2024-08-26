@@ -1,1 +1,30 @@
+.sidebar {
+  width: 250px;
+  background-color: #333;
+  color: #fff;
+  transition: width 0.3s ease;
 
+  &.closed {
+    width: 80px;
+  }
+
+  .sidebar-content {
+    padding: 10px;
+
+    .menu-item {
+      padding: 10px;
+      font-size: 16px;
+      color: #ccc;
+
+      &:hover {
+        color: #fff;
+        background-color: #444;
+      }
+    }
+
+    .menu-item-active {
+      color: #fff;
+      background-color: #222;
+    }
+  }
+}

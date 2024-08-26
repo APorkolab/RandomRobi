@@ -1,8 +1,8 @@
-import { UserService } from './../../service/user.service';
 import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { UserService } from '../../service/user.service';
 import { User } from 'src/app/model/user';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-user-editor',
@@ -13,42 +13,26 @@ export class UserEditorComponent implements OnInit {
   user$!: Observable<User>;
   user: User = new User();
 
-  constructor(
-    private userService: UserService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) { }
+  constructor(private userService: UserService, private router: Router, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.route.params.subscribe({
-      next: (param) => {
-        if (param['id'] == '0') {
-          return of(new User());
-        }
-        this.user$ = this.userService.getOne(param['id']);
-        return this.userService.getOne(param['id']);
-      },
-    });
-    this.user$.subscribe({
-      next: (user) =>
-        (this.user = user ? user : this.user),
-    });
+    const userId = this.route.snapshot.paramMap.get('id');
+    if (userId) {
+      this.userService.handleUser('get').subscribe((users: User[]) => {  // Típus meghatározása User[]
+        this.user = users.find((u: User) => u.id === userId) || this.user;  // Típus meghatározása User
+      });
+    }
   }
 
-  onUpdate(user: User) {
-    this.userService.update(user).subscribe({
-      next: (category) => this.router.navigate(['/', 'users']),
-      error: (err) => console.error(err),
-      complete: () => alert('The user has been updated successfully.'),
-    });
+  onSave(): void {
+    if (this.user.id) {
+      this.userService.handleUser('update', this.user).subscribe(() => {
+        this.router.navigate(['/users']);
+      });
+    } else {
+      this.userService.handleUser('create', this.user).subscribe(() => {
+        this.router.navigate(['/users']);
+      });
+    }
   }
-
-  onCreate(user: User) {
-    this.userService.create(user).subscribe({
-      next: (category) => this.router.navigate(['/', 'users']),
-      error: (err) => console.error(err),
-      complete: () => alert('The new user has been created successfully.'),
-    });
-  }
-
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthService, ILoginData } from 'src/app/service/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -7,19 +7,21 @@ import { AuthService, ILoginData } from 'src/app/service/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  loginData: ILoginData = {
+  loginData = {
     username: '',
     password: ''
   };
 
-  constructor(private auth: AuthService) { }
-
-  ngOnInit(): void {
-    this.auth.logout();
-  }
-
+  constructor(private router: Router) { }
+  currentYear: number = new Date().getFullYear();
   onLogin(): void {
-    this.auth.login(this.loginData);
-
+    // Implement authentication logic here, for example, calling an AuthService
+    if (this.loginData.username === 'admin' && this.loginData.password === 'password') {
+      // Redirect to the admin page on successful login
+      this.router.navigate(['/admin']);
+    } else {
+      // Handle login error
+      alert('Invalid username or password');
+    }
   }
 }

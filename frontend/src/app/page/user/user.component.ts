@@ -1,9 +1,8 @@
-import { UserService } from './../../service/user.service';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { User } from 'src/app/model/user';
+import { UserService } from '../../service/user.service';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/service/auth.service';
+import { User } from 'src/app/model/user';
 
 @Component({
   selector: 'app-user',
@@ -11,92 +10,72 @@ import { AuthService } from 'src/app/service/auth.service';
   styleUrls: ['./user.component.scss']
 })
 export class UserComponent implements OnInit {
-  @Input() list: User[] | any[] = [];
+  user$!: Observable<User>;
   users$!: Observable<User[]>;
-  user: User = new User();
-  user$ = this.auth.user$;
-
-  keys: { [x: string]: string } = {};
-  phrase: string = '';
-  filterKey: string = '';
-  changeText = true;
-  pageSize: number = 25;
-  lastPage = false;
-  startSlice: number = 0;
-  endSlice: number = 25;
-  page: number = 1;
-
+  pageList: number[] = [];
+  page = 1;
+  startSlice = 0;
+  endSlice = 10;
+  phrase = '';
+  filterKey = '';
+  columnKey = '';
+  sortDir: boolean = true;
   columns = [
     { key: 'id', title: 'ID' },
     { key: 'username', title: 'Username' },
-    { key: 'password', title: 'Password' },
-    { key: 'email', title: 'E-mail' },
+    { key: 'email', title: 'Email' }
   ];
 
-  constructor(private userService: UserService, private router: Router, private auth: AuthService) { }
+  constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit(): void {
-    this.users$ = this.userService.getAll();
-    this.users$.subscribe((users) => {
-      this.list = users;
-      this.updatePage();
+    this.loadUsers();
+    this.setupPagination();
+  }
+
+  setupPagination(): void {
+    this.users$.subscribe(users => {
+      const totalItems = users.length;
+      const itemsPerPage = 10;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      this.pageList = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+      if (this.page > totalPages) {
+        this.page = totalPages;
+        this.jumptoPage(this.page);
+      }
     });
   }
-  get pageList(): number[] {
-    const pageCount = Math.ceil(this.list.length / this.pageSize);
-    const maxPageCount = Math.min(pageCount, 10);
-    const pages = new Array(maxPageCount).fill(1).map((x, i) => i + 1);
-    return pages;
-  }
 
-  columnKey: string = '';
-  sortDir: number = -1;
-
-  onColumnSelect(key: string): void {
-    this.columnKey = key;
-    this.sortDir = this.sortDir * -1;
-  }
-
-  jumptoPage(pageNum: number): void {
-    const maxPage = Math.ceil(this.list.length / this.pageSize);
-    if (pageNum < 1 || pageNum > maxPage) {
-      return;
-    }
-    this.page = pageNum;
-    this.updatePage();
-  }
-
-  private updatePage(): void {
-    const maxPage = Math.ceil(this.list.length / this.pageSize);
-    this.startSlice = (this.page - 1) * this.pageSize;
-    this.endSlice = Math.min(this.startSlice + this.pageSize, this.list.length);
-    const pageList = new Array(maxPage).fill(1).map((x, i) => i + 1);
-    this.lastPage = this.page === pageList[pageList.length - 1];
+  loadUsers(): void {
+    this.users$ = this.userService.getAllUsers();
   }
 
   editUser(user: User): void {
-    this.router.navigate(['/', 'user', 'edit', user.id]);
+    this.router.navigate(['/user/edit', user.id]);
   }
 
   deleteUser(user: User): void {
-    if (confirm('Are you sure you want to delete this user?')) {
-      this.userService.delete(user).subscribe({
-        next: () => {
-          this.users$ = this.userService.getAll();
-          console.log('Video deleted successfully.');
-        },
-        error: (err) => console.error(err),
-        complete: () => alert('The video has been deleted successfully.'),
+    if (confirm(`Are you sure you want to delete the user with ID ${user.id}?`)) {
+      this.userService.handleUser('delete', user).subscribe(() => {
+        this.loadUsers();
       });
     }
   }
 
-  onCreate(user: User) {
-    this.userService.create(user).subscribe({
-      next: () => this.router.navigate(['/user', 'edit', 0]),
-      error: (err) => console.log(err),
-      complete: () => alert('The new video has been created successfully.'),
-    });
+  jumptoPage(pageNum: number): void {
+    this.page = pageNum;
+    this.startSlice = (pageNum - 1) * 10;
+    this.endSlice = this.startSlice + 10;
   }
 
+  onColumnSelect(columnKey: string): void {
+    if (this.columnKey === columnKey) {
+      this.sortDir = !this.sortDir;
+    } else {
+      this.columnKey = columnKey;
+      this.sortDir = true;
+    }
+  }
 }

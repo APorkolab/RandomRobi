@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -19,37 +19,43 @@ import { AuthService } from './service/auth.service';
 import { UserComponent } from './page/user/user.component';
 import { UserEditorComponent } from './page/user-editor/user-editor.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
+import { VideoService } from './service/video.service';
+import { RouterModule } from '@angular/router';
+
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     SafePipe,
     SidebarComponent,
-    AdminComponent,
     VideoEditorComponent,
     LoginComponent,
     SorterPipe,
     FilterPipe,
     UserComponent,
-    UserEditorComponent
+    UserEditorComponent,
+    AdminComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule,
     FormsModule,
     MatIconModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    CommonModule,
+    RouterModule.forRoot([])
   ],
   providers: [
+    provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
       deps: [AuthService],
       multi: true,
     },
-    DatePipe
+    DatePipe,
+    VideoService
   ],
   bootstrap: [AppComponent]
 })

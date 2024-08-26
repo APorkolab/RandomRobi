@@ -5,7 +5,7 @@ const {
 	MAX_TRIES,
 	RETRY_DELAY
 } = require('../config/constants');
-const logger = require('./logger');
+const logger = require('../logger/logger');
 
 let isGeneratingVideo = false;
 let browserInstance = null;

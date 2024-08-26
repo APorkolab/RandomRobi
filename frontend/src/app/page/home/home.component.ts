@@ -1,9 +1,6 @@
-import { VideoService } from './../../service/video.service';
 import { Component, OnInit } from '@angular/core';
+import { VideoService } from '../../service/video.service';
 import { Router } from '@angular/router';
-import { Video } from 'src/app/model/video';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -11,67 +8,30 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  video$: Observable<Video> = this.videoService.getLatest();
-  link = '';
-  isPlaying = false;
-  isLoaded = false;
-  showAdminButton = false;
-  entity: string = 'Video';
+  link: string = '';
+  showAdminButton: boolean = false;
+  currentYear: number = new Date().getFullYear();
 
-  constructor(
-    private videoService: VideoService,
-    private router: Router,
-  ) { }
+  constructor(private videoService: VideoService, private router: Router) { }
 
   ngOnInit(): void {
-    this.video$.pipe(map(video => video.link)).subscribe(link => this.link = link);
-    setTimeout(() => {
-      this.showAdminButton = true;
-      console.log('Admin button revealed.');
-    }, 15000);
+    this.getRandomVideo();
+    this.delayAdminButton();  // Késleltetett admin gomb megjelenítésének hívása
   }
 
-  onAdminClick() {
-    this.router.navigate(['/', 'admin']);
-  }
-
-  getRandomVideo() {
-    this.videoService.getRandom().subscribe(video => {
+  getRandomVideo(): void {
+    this.videoService.getRandomVideo().subscribe((video: { link: string; }) => {
       this.link = video.link;
-      this.isPlaying = false;
     });
   }
 
-  onLoad() {
-    console.log('Video loaded.');
-    this.isPlaying = true;
-    this.isLoaded = true;
+  onAdminClick(): void {
+    this.router.navigate(['/admin']);
   }
 
-  onEnded() {
-    console.log('Video ended.');
-    this.isPlaying = false;
-    this.isLoaded = false;
-  }
-
-  onPause() {
-    console.log('Video paused');
-    this.isPlaying = false;
-  }
-
-  onError() {
-    console.log('Error loading video.');
-    this.isPlaying = false;
-    this.isLoaded = false;
-    // Try to fetch another video if there's an error
-    this.getRandomVideo();
-  }
-
-  getButtonText(): string {
-    return this.isPlaying ? 'Weird sh*t generator disabled' : 'Gimme some weird YT sh*t, dude!';
-  }
-
-  getButtonClass(): string {
-    return this.isPlaying ? 'btn-outline-dark btn-sm' : 'btn-dark';
+  delayAdminButton(): void {
+    setTimeout(() => {
+      this.showAdminButton = true;
+    }, 10000);  // 10 másodperc késleltetés (10000 ms)
   }
 }

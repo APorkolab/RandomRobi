@@ -1,10 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { VideoService } from '../../service/video.service';
-import { Video } from '../../model/video';
-import { AuthService } from 'src/app/service/auth.service';
-
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { VideoService } from '../../service/video.service';
 import { Router } from '@angular/router';
+import { User } from 'src/app/model/user';
 
 @Component({
   selector: 'app-admin',
@@ -12,93 +11,66 @@ import { Router } from '@angular/router';
   styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit {
-  @Input() list: Video[] | any[] = [];
-  user$ = this.auth.user$;
-
-  videos$!: Observable<Video[]>;
-  video: Video = new Video();
-
-
-  keys: { [x: string]: string } = {};
-  phrase: string = '';
-  filterKey: string = '';
-  changeText = true;
-  pageSize: number = 25;
-  lastPage = false;
-  startSlice: number = 0;
-  endSlice: number = 25;
-  page: number = 1;
-
+  user$!: Observable<User>;
+  isUserLoggedIn$: Observable<boolean> = new Observable<boolean>();
+  videos$: Observable<any[]> = new Observable<any[]>();
+  pageList: number[] = [];
+  page = 1;
+  startSlice = 0;
+  endSlice = 10;
+  phrase = '';
+  filterKey = '';
+  columnKey = '';
+  sortDir = true;
   columns = [
     { key: 'id', title: 'ID' },
     { key: 'link', title: 'Link' },
     { key: 'createdAt', title: 'Created At' }
   ];
-  get pageList(): number[] {
-    const pageCount = Math.ceil(this.list.length / this.pageSize);
-    const maxPageCount = Math.min(pageCount, 10);
-    const pages = new Array(maxPageCount).fill(1).map((x, i) => i + 1);
-    return pages;
-  }
 
-
-
-  columnKey: string = '';
-  sortDir: number = -1;
-
-  onColumnSelect(key: string): void {
-    this.columnKey = key;
-    this.sortDir = this.sortDir * -1;
-  }
-  constructor(private videoService: VideoService, private router: Router, private auth: AuthService) { }
+  constructor(private videoService: VideoService, private router: Router) { }
 
   ngOnInit(): void {
-    this.videos$ = this.videoService.getAll();
-    this.videos$.subscribe((videos) => {
-      this.list = videos;
-      this.updatePage();
-    });
+    this.isUserLoggedIn$ = this.user$.pipe(map(user => !!user));
+    this.loadVideos();
+    this.setupPagination();
   }
 
-  editVideo(video: Video): void {
-    this.router.navigate(['/', 'edit', video.id]);
+  loadVideos(): void {
+    this.videos$ = this.videoService.getAllVideos();  // Helyes metódusnév
   }
 
-  deleteVideo(video: Video): void {
-    if (confirm('Are you sure you want to delete this video?')) {
-      this.videoService.delete(video).subscribe({
-        next: () => {
-          this.videos$ = this.videoService.getAll();
-          console.log('Video deleted successfully.');
-        },
-        error: (err) => console.error(err),
-        complete: () => alert('The video has been deleted successfully.'),
+  editVideo(video: any): void {
+    this.router.navigate(['/edit', video.id]);
+  }
+
+  deleteVideo(video: any): void {
+    if (confirm(`Are you sure you want to delete the video with ID ${video.id}?`)) {
+      this.videoService.deleteVideo(video.id).subscribe(() => {
+        this.loadVideos(); // Reload videos after deletion
       });
     }
   }
 
   jumptoPage(pageNum: number): void {
-    const maxPage = Math.ceil(this.list.length / this.pageSize);
-    if (pageNum < 1 || pageNum > maxPage) {
-      return;
-    }
     this.page = pageNum;
-    this.updatePage();
+    this.startSlice = (pageNum - 1) * 10;
+    this.endSlice = this.startSlice + 10;
   }
 
-  private updatePage(): void {
-    const maxPage = Math.ceil(this.list.length / this.pageSize);
-    this.startSlice = (this.page - 1) * this.pageSize;
-    this.endSlice = Math.min(this.startSlice + this.pageSize, this.list.length);
-    const pageList = new Array(maxPage).fill(1).map((x, i) => i + 1);
-    this.lastPage = this.page === pageList[pageList.length - 1];
-  }
-  onCreate(video: Video) {
-    this.videoService.create(video).subscribe({
-      next: () => this.router.navigate(['/', 'admin']),
-      error: (err) => console.log(err),
-      complete: () => alert('The new video has been created successfully.'),
+  setupPagination(): void {
+    this.videos$.subscribe(videos => {
+      const pages = Math.ceil(videos.length / 10);
+      this.pageList = Array.from({ length: pages }, (_, i) => i + 1);
     });
   }
 
+  onColumnSelect(columnKey: string): void {
+    if (this.columnKey === columnKey) {
+      this.sortDir = !this.sortDir;
+    } else {
+      this.columnKey = columnKey;
+      this.sortDir = true;
+    }
+  }
 }
