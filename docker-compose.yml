@@ -7,7 +7,8 @@ services:
       MYSQL_DATABASE: randomrobi_db
       MYSQL_USER: randomrobi_user
       MYSQL_PASSWORD: securepassword123
-      MYSQL_ROOT_PASSWORD: rootsecurepassword456
+      MYSQL_ROOT_PASSWORD: rootsecurepassword456,
+      MYSQL_ROOT_HOST: '%'
     volumes:
       - db_data:/var/lib/mysql
       - ./backend/my.cnf:/etc/mysql/my.cnf
