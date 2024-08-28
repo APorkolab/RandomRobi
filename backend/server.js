@@ -38,8 +38,8 @@ const createAdminUser = async () => {
 
 // Start the server and create admin user
 const initializeApp = async () => {
-	await createAdminUser();
-	await startServer();
+	await startServer(); // Start server first and sync tables
+	await createAdminUser(); // Then create the admin user
 };
 
 initializeApp();
