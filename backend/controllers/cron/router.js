@@ -27,9 +27,13 @@ router.get('/run', async (req, res) => {
 	};
 
 	try {
-		await generateAndStoreRandomVideo();
+		const result = await generateAndStoreRandomVideo();
 		const formattedDate = new Date().toLocaleString('hu-HU', options);
-		res.status(200).send(`The cron job has been successfully applied at ${formattedDate}`);
+		if (result) {
+			res.status(200).send(`A cron feladat sikeresen lefutott ${formattedDate}-kor. Generált videó: ${result.link}`);
+		} else {
+			res.status(500).send(`A cron feladat lefutott ${formattedDate}-kor, de nem generált új videót.`);
+		}
 	} catch (err) {
 		console.error('Error running cron job manually:', err);
 		const formattedDate = new Date().toLocaleString('hu-HU', options);

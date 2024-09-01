@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class VideoService extends BaseService {
 
-  private readonly apiEndpoint = '/api/videos';  // Általános végpont
+  private readonly apiEndpoint = '/video';  // Általános végpont
 
   // Összes videó lekérése
   getAllVideos(): Observable<Video[]> {
@@ -38,6 +38,6 @@ export class VideoService extends BaseService {
 
   // Véletlenszerű videó lekérése
   getRandomVideo(): Observable<Video> {
-    return this.get<Video>(`${environment.apiUrl}/random`);
+    return this.get<Video>(`${environment.apiUrl}${this.apiEndpoint}/random`);
   }
 }

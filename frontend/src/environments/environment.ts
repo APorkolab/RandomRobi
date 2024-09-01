@@ -1,4 +1,4 @@
 export const environment = {
 	production: true,
-	apiUrl: 'https://api.randomrobi.devma.de',
+	apiUrl: 'https://api.randomrobi.porkolab.hu',
 };

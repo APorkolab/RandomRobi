@@ -1,7 +1,5 @@
 const bcrypt = require('bcrypt');
-const {
-	DataTypes
-} = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const saltRounds = 10;
 
@@ -13,7 +11,8 @@ const User = sequelize.define("User", {
 	},
 	username: {
 		type: DataTypes.STRING,
-		allowNull: false
+		allowNull: false,
+		unique: true
 	},
 	password: {
 		type: DataTypes.STRING,
@@ -21,7 +20,10 @@ const User = sequelize.define("User", {
 	},
 	email: {
 		type: DataTypes.STRING,
-		allowNull: true
+		allowNull: true,
+		validate: {
+			isEmail: true
+		}
 	}
 }, {
 	freezeTableName: true,
@@ -33,7 +35,7 @@ const User = sequelize.define("User", {
 });
 
 async function hashPassword(user) {
-	if (user.password) {
+	if (user.changed('password')) {
 		const salt = await bcrypt.genSalt(saltRounds);
 		user.password = await bcrypt.hash(user.password, salt);
 	}

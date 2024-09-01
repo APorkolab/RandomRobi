@@ -1,12 +1,38 @@
 /**
  * @swagger
- * /video/all:
+ * /user:
+ *   post:
+ *     summary: Create a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: New user has been created
+ *       500:
+ *         description: Error creating user
+ */
+
+/**
+ * @swagger
+ * /user/all:
  *   get:
- *     summary: Retrieve all video links from the database
- *     tags: [Videos]
+ *     summary: Retrieve all users
+ *     tags: [Users]
  *     responses:
  *       200:
- *         description: A list of video links
+ *         description: A list of users
  *         content:
  *           application/json:
  *             schema:
@@ -16,53 +42,49 @@
  *                 properties:
  *                   id:
  *                     type: integer
- *                   link:
+ *                   username:
  *                     type: string
- *                   createdAt:
+ *                   email:
  *                     type: string
- *                     format: date-time
  *       500:
- *         description: Error retrieving video links
+ *         description: Error fetching users
  */
 
 /**
  * @swagger
- * /video/daily:
- *   post:
- *     summary: Add a new video link to the database
- *     tags: [Videos]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               link:
- *                 type: string
- *               createdAt:
- *                 type: string
- *                 format: date-time
+ * /user/{id}:
+ *   get:
+ *     summary: Retrieve a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the user to retrieve
  *     responses:
- *       201:
- *         description: Video link added successfully
+ *       200:
+ *         description: The user information
+ *       404:
+ *         description: User not found
  *       500:
- *         description: Error adding video link
+ *         description: Error fetching user
  */
 
 /**
  * @swagger
- * /video/{id}:
+ * /user/{id}:
  *   put:
- *     summary: Update an existing video link in the database
- *     tags: [Videos]
+ *     summary: Update a user by ID
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: The ID of the video link to update
+ *         description: The ID of the user to update
  *     requestBody:
  *       required: true
  *       content:
@@ -70,149 +92,138 @@
  *           schema:
  *             type: object
  *             properties:
- *               link:
+ *               username:
  *                 type: string
- *               createdAt:
+ *               password:
  *                 type: string
- *                 format: date-time
+ *               email:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Video link updated successfully
+ *         description: The user has been updated
+ *       404:
+ *         description: User not found
  *       500:
- *         description: Error updating video link
+ *         description: Error updating user
  */
 
 /**
  * @swagger
- * /video/{id}:
+ * /user/{id}:
  *   delete:
- *     summary: Delete a video link from the database
- *     tags: [Videos]
+ *     summary: Delete a user by ID
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: The ID of the video link to delete
+ *         description: The ID of the user to delete
  *     responses:
  *       200:
- *         description: Video link deleted successfully
+ *         description: The user has been deleted
+ *       404:
+ *         description: User not found
  *       500:
- *         description: Error deleting video link
- */
-
-/**
- * @swagger
- * /video/latest:
- *   get:
- *     summary: Retrieve the latest video link from the database
- *     tags: [Videos]
- *     responses:
- *       200:
- *         description: The latest video link
- *       500:
- *         description: Error retrieving the latest video link
- */
-
-/**
- * @swagger
- * /video/random:
- *   get:
- *     summary: Generate and retrieve a random video link
- *     tags: [Videos]
- *     responses:
- *       200:
- *         description: A random video link
- *       500:
- *         description: Error retrieving random video link
+ *         description: Error deleting user
  */
 const express = require('express');
 const router = express.Router();
-const {
-	getLastVideoLink,
-	generateRandomLink,
-	getAllLinksFromDatabase,
-	addLinkToDatabase,
-	updateLinkInDatabase,
-	deleteLinkFromDatabase
-} = require('../../services/videoService');
+const User = require('../../models/user');
+const bcrypt = require('bcrypt');
 
-router.get('/all', async (req, res) => {
+router.post('/', async (req, res) => {
 	try {
-		const rows = await getAllLinksFromDatabase();
-		res.send(rows);
+		const hashedPassword = await hashPassword(req.body.password);
+		await User.create({...req.body, password: hashedPassword});
+		res.status(201).json({
+			message: 'New user has been created.'
+		});
 	} catch (error) {
-		console.error('Error retrieving video links:', error);
-		res.status(500).send('Error retrieving video links');
+		console.error('Error creating user:', error);
+		res.status(500).json({
+			error: 'Error creating user.'
+		});
 	}
 });
 
-router.post('/daily', async (req, res) => {
+router.get('/all', async (req, res) => {
 	try {
-		const {
-			link,
-			createdAt
-		} = req.body;
-		const record = await addLinkToDatabase(link, createdAt);
-		res.status(201).json({
-			message: 'Video link added successfully',
-			record
-		});
+		const users = await User.findAll();
+		res.json(users);
 	} catch (error) {
-		console.error('Error adding video link:', error);
-		res.status(500).send('Error adding video link');
+		console.error('Error fetching users:', error);
+		res.status(500).send('Error fetching users');
+	}
+});
+
+router.get('/:id', async (req, res) => {
+	try {
+		const user = await User.findByPk(req.params.id);
+		if (!user) {
+			return res.status(404).send('User not found');
+		}
+		res.json(user);
+	} catch (error) {
+		console.error('Error fetching user:', error);
+		res.status(500).send('Error fetching user');
 	}
 });
 
 router.put('/:id', async (req, res) => {
 	try {
-		const updatedVideo = req.body;
-		updatedVideo.id = req.params.id;
-		const record = await updateLinkInDatabase(updatedVideo);
+		const updatedUser = req.body;
+		if (updatedUser.password) {
+			updatedUser.password = await hashPassword(updatedUser.password);
+		}
+		const result = await User.update(updatedUser, {
+			where: {
+				id: req.params.id
+			}
+		});
+		if (result[0] === 0) {
+			return res.status(404).json({
+				error: 'User not found'
+			});
+		}
 		res.status(200).json({
-			message: 'Video link updated successfully',
-			record
+			message: 'The user has been updated.'
 		});
 	} catch (error) {
-		console.error('Error updating video link:', error);
-		res.status(500).send('Error updating video link');
+		console.error('Error updating user:', error);
+		res.status(500).json({
+			error: 'Error updating user'
+		});
 	}
 });
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const id = req.params.id;
-		await deleteLinkFromDatabase(id);
+		const result = await User.destroy({
+			where: {
+				id: req.params.id
+			}
+		});
+		if (result === 0) {
+			return res.status(404).json({
+				error: 'User not found'
+			});
+		}
 		res.status(200).json({
-			message: `The video link with id ${id} has been deleted.`
+			message: 'The user has been deleted.'
 		});
 	} catch (error) {
-		console.error(`Error deleting video link with id ${id}:`, error);
+		console.error('Error deleting user:', error);
 		res.status(500).json({
-			error: `Error deleting video link with id ${id}: ${error.message}`
+			error: 'Error deleting user'
 		});
 	}
 });
 
-router.get('/latest', async (req, res) => {
-	try {
-		const row = await getLastVideoLink();
-		res.json(row);
-	} catch (error) {
-		console.error('Error retrieving video link:', error);
-		res.status(500).json('Error retrieving video link');
-	}
-});
-
-router.get('/random', async (req, res) => {
-	try {
-		const row = await generateRandomLink();
-		res.send(row);
-	} catch (error) {
-		console.error('Error retrieving random video link:', error);
-		res.status(500).send('Error retrieving random video link');
-	}
-});
+async function hashPassword(password) {
+	const salt = await bcrypt.genSalt(10);
+	return bcrypt.hash(password, salt);
+}
 
 module.exports = router;

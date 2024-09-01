@@ -3,11 +3,35 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const logger = require('./logger/logger');
+const morgan = require('morgan');
 const sequelize = require('./config/database');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const app = express();
 const port = process.env.PORT || 3000;
+
+// CORS beállítások
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['http://localhost:4200']; // Alapértelmezett fejlesztői origin
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+logger.info(`CORS origins set to: ${allowedOrigins.join(', ')}`);
 
 // Swagger configuration
 const swaggerOptions = {
@@ -33,8 +57,36 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+// Egyedi Morgan formátum a kérések és válaszok naplózásához
+morgan.token('body', (req) => JSON.stringify(req.body));
+morgan.token('response-time', (req, res, digits) => {
+	if (!req._startAt || !res._startAt) {
+		return;
+	}
+	const ms = (res._startAt[0] - req._startAt[0]) * 1e3 +
+		(res._startAt[1] - req._startAt[1]) * 1e-6;
+	return ms.toFixed(digits === undefined ? 3 : digits);
+});
+
+const loggerFormat = ':method :url :status :response-time ms - :res[content-length] :body - :response-time ms';
+
+// Logging middleware
+app.use(morgan(loggerFormat, { 
+	stream: logger.stream,
+	skip: (req, res) => res.statusCode < 400 // Opcionális: csak a hibákat naplózza
+}));
+
+// Middleware a válasz naplózásához
+app.use((req, res, next) => {
+	const oldJson = res.json;
+	res.json = function (body) {
+		logger.info(`Response body: ${JSON.stringify(body)}`);
+		return oldJson.call(this, body);
+	};
+	next();
+});
+
 // Middleware setup
-app.use(cors());
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
@@ -68,7 +120,7 @@ const startServer = async () => {
 		await sequelize.authenticate();
 		logger.info('Connected to the database.');
 
-		await sequelize.sync(); // Sync tables here
+		await sequelize.sync({ alter: true }); // Use alter: true for development
 		logger.info('All models synced.');
 
 		app.listen(port, () => {

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { VideoService } from '../../service/video.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
 @Component({
@@ -8,21 +9,33 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  link: string = '';
+  link!: SafeResourceUrl;
   showAdminButton: boolean = false;
   currentYear: number = new Date().getFullYear();
 
-  constructor(private videoService: VideoService, private router: Router) { }
+  constructor(private videoService: VideoService, private sanitizer: DomSanitizer, private router: Router) { }
 
   ngOnInit(): void {
     this.getRandomVideo();
-    this.delayAdminButton();  // Késleltetett admin gomb megjelenítésének hívása
+    this.delayAdminButton();
   }
 
-  getRandomVideo(): void {
-    this.videoService.getRandomVideo().subscribe((video: { link: string; }) => {
-      this.link = video.link;
-    });
+  getRandomVideo() {
+    this.videoService.getRandomVideo().subscribe(
+      (response: any) => {
+        // Ellenőrizzük, hogy a válasz tartalmazza-e a link tulajdonságot
+        if (response && response.link) {
+          console.log('Kapott video URL:', response.link);
+          // Biztonságosan megjelenítjük az URL-t az iframe-ben
+          this.link = this.sanitizer.bypassSecurityTrustResourceUrl(response.link);
+        } else {
+          console.error('Érvénytelen videó URL:', response ? response.link : 'undefined');
+        }
+      },
+      (error) => {
+        console.error('Hiba történt a videó betöltése közben:', error);
+      }
+    );
   }
 
   onAdminClick(): void {

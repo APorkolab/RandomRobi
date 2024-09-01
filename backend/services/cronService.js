@@ -1,17 +1,31 @@
 const cron = require('node-cron');
-const {
-	generateAndStoreRandomVideo
-} = require('./videoService');
-const logger = require('./logger');
+const { generateAndStoreRandomVideo } = require('./videoService');
+const logger = require('./../logger/logger');
 
-// Ütemezett feladat minden 12 órában
-cron.schedule('0 0 */12 * * *', async () => {
-	try {
-		await generateAndStoreRandomVideo();
-		logger.info('Cron job successfully executed');
-	} catch (error) {
-		logger.error('Error running cron job:', error);
-	}
-});
+const CRON_SCHEDULE = process.env.CRON_SCHEDULE || '0 0 */12 * * *';
+const MAX_RETRIES = 3;
 
-module.exports = cron;
+function initCronJob() {
+	cron.schedule(CRON_SCHEDULE, async () => {
+		let retries = 0;
+		while (retries < MAX_RETRIES) {
+			try {
+				await generateAndStoreRandomVideo();
+				logger.info('Cron job sikeresen végrehajtva');
+				break;
+			} catch (error) {
+				retries++;
+				logger.error(`Hiba a cron job futtatásakor (${retries}. próbálkozás):`, error);
+				if (retries >= MAX_RETRIES) {
+					logger.error('Maximális újrapróbálkozások száma elérve. A cron job sikertelen.');
+				}
+			}
+		}
+	}, {
+		timezone: "Europe/Budapest"
+	});
+
+	logger.info('Cron job inicializálva');
+}
+
+module.exports = { initCronJob };

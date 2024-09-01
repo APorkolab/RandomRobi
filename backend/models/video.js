@@ -1,7 +1,5 @@
 "use strict";
-const {
-	DataTypes
-} = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
 const Video = sequelize.define("Video", {
@@ -13,7 +11,10 @@ const Video = sequelize.define("Video", {
 	},
 	link: {
 		type: DataTypes.STRING,
-		allowNull: false
+		allowNull: false,
+		validate: {
+			isUrl: true // Ensure the link is a valid URL
+		}
 	},
 	createdAt: {
 		type: DataTypes.DATE,

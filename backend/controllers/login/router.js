@@ -46,46 +46,51 @@ const bcrypt = require('bcrypt');
 const Users = require('../../models/user');
 
 router.post('/', async (req, res) => {
-	const {
-		username,
-		password
-	} = req.body;
+	const { username, password } = req.body;
+
+	if (!username || !password) {
+		return res.status(400).json({
+			error: 'Felhasználónév és jelszó megadása kötelező'
+		});
+	}
 
 	try {
 		const user = await Users.findOne({
-			where: {
-				username
-			},
-			attributes: ['id', 'username', 'password']
+			where: { username },
+			attributes: ['id', 'username', 'password', 'email']
 		});
 
 		if (!user) {
 			return res.status(404).json({
-				error: 'This user does not exist'
+				error: 'A felhasználó nem létezik'
 			});
 		}
 
 		const valid = await bcrypt.compare(password, user.password);
 		if (valid) {
 			const accessToken = jwt.sign({
-				username: user.username
+				username: user.username,
+				userId: user.id
 			}, process.env.JWT_SECRET, {
 				expiresIn: '1h'
 			});
 			return res.json({
 				accessToken,
 				user: {
-					...user.toJSON(),
-					password: ''
+					id: user.id,
+					username: user.username,
+					email: user.email
 				}
 			});
 		} else {
-			return res.sendStatus(401);
+			return res.status(401).json({
+				error: 'Helytelen jelszó'
+			});
 		}
 	} catch (error) {
-		console.error('Login error:', error);
-		res.status(500).json({
-			error: 'An error occurred during login'
+		console.error('Bejelentkezési hiba:', error);
+		return res.status(500).json({
+			error: 'Hiba történt a bejelentkezés során'
 		});
 	}
 });

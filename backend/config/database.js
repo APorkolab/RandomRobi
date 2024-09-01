@@ -16,7 +16,7 @@ if (!DB_NAME || !DB_USER || !DB_PASSWORD || !DB_HOST) {
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
   dialect: 'mysql',
-  port: 3306,
+  port: process.env.DB_PORT || 3306, // Port beállítása környezeti változóból
   pool: {
     max: 10,
     min: 0,
@@ -25,5 +25,13 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   },
   logging: false
 });
+
+// Kapcsolat ellenőrzése
+sequelize.authenticate()
+  .then(() => console.log('Adatbázis kapcsolat sikeresen létrehozva.'))
+  .catch(err => {
+    console.error('Nem sikerült kapcsolódni az adatbázishoz:', err);
+    process.exit(1); // Kilépés hiba esetén
+  });
 
 module.exports = sequelize;
