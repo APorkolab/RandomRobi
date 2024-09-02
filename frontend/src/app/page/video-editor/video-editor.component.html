@@ -2,7 +2,7 @@
 	<div class="col-12 d-flex justify-content-center text-center">
 		<div class="card">
 			<div class="card-header card-header-primary">
-				<h4 class="card-title" *ngIf="video$ | async as video; else addVideo">Edit the data of the YouTube video</h4>
+				<h4 class="card-title" *ngIf="video.id !== 0; else addVideo">Edit the data of the YouTube video</h4>
 				<ng-template #addVideo>
 					<h4 class="card-title">Add a new YouTube video</h4>
 				</ng-template>
@@ -30,9 +30,9 @@
 							system will use the current timestamp.</small>
 					</div>
 
-					<button *ngIf="video$ | async as video" (click)="onUpdate(video)" [disabled]="videoForm.invalid" type="submit"
+					<button *ngIf="video.id !== 0" (click)="onUpdate(video)" [disabled]="videoForm.invalid" type="submit"
 						class="btn btn-primary pull-right me-md-3">Update data of YouTube video</button>
-					<button *ngIf="!(video$ | async)" (click)="onCreate(video)" [disabled]="videoForm.invalid" type="submit"
+					<button *ngIf="video.id === 0" (click)="onCreate(video)" [disabled]="videoForm.invalid" type="submit"
 						class="btn btn-primary pull-right me-md-3">Create data of YouTube video</button>
 					<button routerLink="/admin" type="button" class="btn btn-danger pull-left">Cancel edit</button>
 					<div class="clearfix"></div>

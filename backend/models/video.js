@@ -5,16 +5,12 @@ const sequelize = require("../config/database");
 const Video = sequelize.define("Video", {
 	id: {
 		type: DataTypes.INTEGER,
-		primaryKey: true,
 		autoIncrement: true,
-		allowNull: false
+		primaryKey: true
 	},
 	link: {
 		type: DataTypes.STRING,
-		allowNull: false,
-		validate: {
-			isUrl: true // Ensure the link is a valid URL
-		}
+		allowNull: false
 	},
 	createdAt: {
 		type: DataTypes.DATE,

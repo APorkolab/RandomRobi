@@ -1,6 +1,7 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 const Video = require('../models/video');
+const moment = require('moment');
 const {
     MAX_TRIES,
     RETRY_DELAY
@@ -129,7 +130,8 @@ async function generateRandomLink() {
 
 const addLinkToDatabase = async (link, createdAt = new Date()) => {
     if (!link) throw new Error('Link is missing');
-    return await Video.create({ link, createdAt });
+    const newVideo = await Video.create({ link, createdAt });
+    return newVideo.toJSON();
 };
 
 const getAllLinksFromDatabase = async () => {
@@ -170,18 +172,17 @@ const updateLinkInDatabase = async (updatedVideo) => {
         const video = await Video.findByPk(id);
         if (!video) throw new Error('Video not found');
 
-        const formattedDate = moment(createdAt).isValid() ? moment(createdAt).format('YYYY-MM-DD HH:mm:ss') : null;
+        const formattedDate = moment(createdAt).isValid() ? moment(createdAt).toDate() : null;
         if (!formattedDate) throw new Error('Invalid date');
 
-        await Video.update({ link, createdAt: formattedDate }, { where: { id } });
+        await video.update({ link, createdAt: formattedDate });
 
-        const updatedVideo = await Video.findByPk(id);
-        logger.info('Updated video:', updatedVideo);
+        logger.info('Updated video:', video);
 
-        return updatedVideo.toJSON();
+        return video.toJSON();
     } catch (error) {
         logger.error('Error updating video:', error.message);
-        throw new Error(error.message);
+        throw error;
     }
 };
 

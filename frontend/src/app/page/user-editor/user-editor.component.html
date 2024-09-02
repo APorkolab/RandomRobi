@@ -2,8 +2,8 @@
 	<div class="col-12 d-flex justify-content-center text-center">
 		<div class="card">
 			<div class="card-header card-header-primary">
-				<h4 class="card-title" *ngIf="user$ | async">Edit the data of the admin</h4>
-				<h4 class="card-title" *ngIf="!(user$ | async)">Add a new admin</h4>
+				<h4 class="card-title" *ngIf="user.id">Edit the data of the admin</h4>
+				<h4 class="card-title" *ngIf="!user.id">Add a new admin</h4>
 			</div>
 			<div class="card-body">
 				<form #userForm="ngForm">
@@ -34,9 +34,9 @@
 						<input type="email" class="form-control" name="email" [(ngModel)]="user.email">
 					</div>
 
-					<button *ngIf="user$ | async" (click)="onSave()" [disabled]="userForm.invalid" type="submit"
+					<button *ngIf="user.id" (click)="onUpdate()" [disabled]="userForm.invalid" type="submit"
 						class="btn btn-primary pull-right me-md-3">Update data of admin</button>
-					<button *ngIf="!(user$ | async)" (click)="onSave()" [disabled]="userForm.invalid" type="submit"
+					<button *ngIf="!user.id" (click)="onCreate()" [disabled]="userForm.invalid" type="submit"
 						class="btn btn-primary pull-right me-md-3">Create data of admin</button>
 					<button routerLink="/users" type="button" class="btn btn-danger pull-left">Cancel edit</button>
 					<div class="clearfix"></div>

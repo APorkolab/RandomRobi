@@ -200,7 +200,7 @@ const {
 	addLinkToDatabase,
 	updateLinkInDatabase,
 	deleteLinkFromDatabase,
-	getLinkById
+	getByIdFromDatabase
 } = require('../../services/videoService');
 
 router.get('/', async (req, res) => {
@@ -213,12 +213,20 @@ router.get('/', async (req, res) => {
 	}
 });
 
+router.post('/', async (req, res) => {
+    try {
+        const { link, createdAt } = req.body;
+        const newVideo = await addLinkToDatabase(link, createdAt);
+        res.status(201).json(newVideo);
+    } catch (error) {
+        console.error('Error creating video:', error);
+        res.status(500).json({ error: 'Error creating video' });
+    }
+});
+
 router.post('/daily', async (req, res) => {
 	try {
-		const {
-			link,
-			createdAt
-		} = req.body;
+		const { link, createdAt } = req.body;
 		const record = await addLinkToDatabase(link, createdAt);
 		res.status(201).json({
 			message: 'Video link added successfully',
@@ -231,32 +239,32 @@ router.post('/daily', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-	try {
-		const id = parseInt(req.params.id, 10);
-		const existingVideo = await getLinkById(id);
-		if (!existingVideo) {
-			return res.status(404).json({ error: `Nem található videó ezzel az azonosítóval: ${id}` });
-		}
-		const { link, createdAt } = req.body;
-		const updatedVideo = { id, link, createdAt };
-		const record = await updateLinkInDatabase(updatedVideo);
-		if (!record) {
-			return res.status(500).json({ error: 'A videó frissítése sikertelen volt' });
-		}
-		res.status(200).json({
-			message: 'A videó link sikeresen frissítve',
-			record
-		});
-	} catch (error) {
-		console.error('Hiba a videó link frissítésekor:', error);
-		res.status(500).send('Hiba a videó link frissítésekor');
-	}
+  try {
+    const id = parseInt(req.params.id, 10);
+    const existingVideo = await getByIdFromDatabase(id);
+    if (!existingVideo) {
+      return res.status(404).json({ error: `Nem található videó ezzel az azonosítóval: ${id}` });
+    }
+    const { link, createdAt } = req.body;
+    const updatedVideo = { id, link, createdAt };
+    const record = await updateLinkInDatabase(updatedVideo);
+    if (!record) {
+      return res.status(500).json({ error: 'A videó frissítése sikertelen volt' });
+    }
+    res.status(200).json({
+      message: 'A videó link sikeresen frissítve',
+      record
+    });
+  } catch (error) {
+    console.error('Hiba a videó link frissítésekor:', error);
+    res.status(500).json({ error: 'Hiba a videó link frissítésekor', details: error.message });
+  }
 });
 
 router.delete('/:id', async (req, res) => {
 	try {
 		const id = parseInt(req.params.id, 10);
-		const existingVideo = await getLinkById(id);
+		const existingVideo = await getByIdFromDatabase(id);
 		if (!existingVideo) {
 			return res.status(404).json({ error: `Nem található videó ezzel az azonosítóval: ${id}` });
 		}
@@ -289,6 +297,20 @@ router.get('/random', async (req, res) => {
 	} catch (error) {
 		console.error('Error retrieving random video link:', error);
 		res.status(500).send('Error retrieving random video link');
+	}
+});
+
+router.get('/:id', async (req, res) => {
+	try {
+		const id = parseInt(req.params.id, 10);
+		const video = await getByIdFromDatabase(id);
+		if (!video) {
+			return res.status(404).json({ error: `Nem található videó ezzel az azonosítóval: ${id}` });
+		}
+		res.json(video);
+	} catch (error) {
+		console.error('Error retrieving video link:', error);
+		res.status(500).json({ error: 'Error retrieving video link', details: error.message });
 	}
 });
 

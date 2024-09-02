@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserService } from '../../service/user.service';
 import { User } from 'src/app/model/user';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-editor',
@@ -18,21 +19,35 @@ export class UserEditorComponent implements OnInit {
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
-      this.userService.handleUser('get').subscribe((users: User[]) => {  // Típus meghatározása User[]
-        this.user = users.find((u: User) => u.id === userId) || this.user;  // Típus meghatározása User
+      this.userService.getUserById(+userId).subscribe(user => {
+        this.user = user;
       });
     }
   }
 
   onSave(): void {
     if (this.user.id) {
-      this.userService.handleUser('update', this.user).subscribe(() => {
-        this.router.navigate(['/users']);
-      });
+      this.onUpdate();
     } else {
-      this.userService.handleUser('create', this.user).subscribe(() => {
-        this.router.navigate(['/users']);
-      });
+      this.onCreate();
     }
+  }
+
+  onUpdate(): void {
+    this.userService.handleUser('update', this.user).subscribe({
+      next: () => {
+        this.router.navigate(['/users']);
+      },
+      error: (err) => console.error('Error updating user:', err)
+    });
+  }
+
+  onCreate(): void {
+    this.userService.handleUser('create', this.user).subscribe({
+      next: () => {
+        this.router.navigate(['/users']);
+      },
+      error: (err) => console.error('Error creating user:', err)
+    });
   }
 }

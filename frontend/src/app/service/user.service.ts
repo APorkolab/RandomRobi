@@ -20,7 +20,7 @@ export class UserService {
 
   // User műveletek kezelése egy metódusban
   handleUser(action: 'get' | 'create' | 'update' | 'delete', user?: User): Observable<any> {
-    let url = `${environment.apiUrl}/users`;
+    let url = `${environment.apiUrl}/user`;
     let request$: Observable<any>;
 
     switch (action) {
@@ -31,10 +31,18 @@ export class UserService {
         request$ = this.http.post<User>(url, user);
         break;
       case 'update':
-        request$ = this.http.put<User>(`${url}/${user?.id}`, user);
+        if (user) {
+          request$ = this.http.put<User>(`${url}/${user.id}`, user);
+        } else {
+          throw new Error('User is undefined');
+        }
         break;
       case 'delete':
-        request$ = this.http.delete<void>(`${url}/${user?.id}`);
+        if (user) {
+          request$ = this.http.delete<void>(`${url}/${user.id}`);
+        } else {
+          throw new Error('User is undefined');
+        }
         break;
       default:
         throw new Error('Invalid action');
@@ -45,7 +53,7 @@ export class UserService {
 
   // Új metódus az összes felhasználó lekérésére
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${environment.apiUrl}/users`);
+    return this.http.get<User[]>(`${environment.apiUrl}/user`);
   }
 
   // A jelenlegi felhasználó elérése
@@ -83,5 +91,10 @@ export class UserService {
     if (storedUser) {
       this.setCurrentUser(JSON.parse(storedUser));
     }
+  }
+
+  // Új metódus az egyes felhasználó lekérésére
+  getUserById(id: number): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/user/${id}`);
   }
 }

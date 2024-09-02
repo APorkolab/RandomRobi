@@ -1,6 +1,6 @@
 export class Video {
 	[k: string]: any;
-	id!: number;
+	id: number | string = '';
 	link: string = '';
 	createdAt: string = '';
 }

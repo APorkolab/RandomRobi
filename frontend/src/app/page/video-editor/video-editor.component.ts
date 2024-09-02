@@ -12,7 +12,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./video-editor.component.scss']
 })
 export class VideoEditorComponent implements OnInit {
-  video$!: Observable<Video | undefined>;
+  video$: Observable<Video> = of();
   video: Video = new Video();
   createdAtString = '';
 
@@ -29,16 +29,19 @@ export class VideoEditorComponent implements OnInit {
     this.video$ = this.route.params.pipe(
       switchMap(params => {
         const videoId = params['id'];
-        if (videoId === '0') {
-          return of(new Video());
-        }
-        return this.videoService.getVideoById(videoId);
-      }),
-      tap(video => {
-        if (video) {
-          this.video = video;
+        if (videoId === '0' || videoId === undefined) {
+          this.video = { id: 0, link: '', createdAt: new Date().toISOString() } as Video;
           this.createdAtString = this.toISODateTimeString(new Date(this.video.createdAt));
+          return of(this.video);
         }
+        return this.videoService.getVideoById(videoId).pipe(
+          tap(video => {
+            if (video) {
+              this.video = video;
+              this.createdAtString = this.toISODateTimeString(new Date(this.video.createdAt));
+            }
+          })
+        );
       })
     );
 
@@ -58,12 +61,18 @@ export class VideoEditorComponent implements OnInit {
       createdAt: this.toISODateTimeString(new Date(this.createdAtString))
     };
 
+    console.log('Updated Video Data:', updatedVideo);
+
     this.videoService.updateVideo(updatedVideo).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Server response:', response);
         alert('The video has been updated successfully.');
         this.router.navigate(['/', 'admin']);
       },
-      error: (err) => console.error('Error updating video:', err)
+      error: (err) => {
+        console.error('Error updating video:', err);
+        alert(`Error updating video: ${err.error?.error || err.message}`);
+      }
     });
   }
 
