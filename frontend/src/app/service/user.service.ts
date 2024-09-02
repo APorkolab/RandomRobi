@@ -90,6 +90,8 @@ export class UserService {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       this.setCurrentUser(JSON.parse(storedUser));
+    } else {
+      this.setCurrentUser(null);
     }
   }
 

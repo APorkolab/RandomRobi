@@ -143,8 +143,13 @@ const startServer = async () => {
 		await sequelize.authenticate();
 		logger.info('Connected to the database.');
 
-		await sequelize.sync({ alter: true }); // Use alter: true for development
-		logger.info('All models synced.');
+		if (process.env.CREATE_TABLES === 'true') {
+			await sequelize.sync({ force: true });
+			logger.info('Database tables created.');
+		} else {
+			await sequelize.sync({ alter: true });
+			logger.info('Database tables updated.');
+		}
 
 		app.listen(port, () => {
 			logger.info(`App listening at http://localhost:${port}`);

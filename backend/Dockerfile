@@ -32,3 +32,5 @@ EXPOSE 3000
 
 # Állítsuk be az indítási parancsot a konténer számára
 CMD ["npm", "start"]
+
+ENV CREATE_TABLES=true
