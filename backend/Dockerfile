@@ -1,4 +1,19 @@
+# Használjuk a Node.js Alpine verzióját, ami egy könnyű Linux disztribúció
 FROM node:18-alpine
+
+# Telepítsük a Puppeteer futtatásához szükséges függőségeket
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    nodejs \
+    yarn
+
+# Állítsuk be a Puppeteer futtatásához szükséges környezeti változót
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Állítsuk be a munkakönyvtárat a konténerben
 WORKDIR /app
@@ -6,10 +21,7 @@ WORKDIR /app
 # Másoljuk át a package.json és package-lock.json fájlokat a konténerbe
 COPY package*.json ./
 
-# Töröljük a meglévő node_modules és package-lock.json fájlokat
-RUN rm -rf node_modules package-lock.json
-
-# Telepítsük újra a függőségeket a konténeren belül
+# Telepítsük a függőségeket a konténeren belül
 RUN npm install
 
 # Másoljuk át a teljes alkalmazás kódját a konténerbe
