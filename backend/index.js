@@ -12,6 +12,9 @@ const { router: loginRouter, adminIps } = require('./controllers/login/router');
 const app = express();
 const port = process.env.PORT;
 
+// Engedélyezzük a proxy megbízhatóságát
+app.set('trust proxy', true);
+
 // Rate Limiting beállítások
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 perc időablak
