@@ -51,14 +51,15 @@ const bcrypt = require('bcrypt');
  */
 router.post('/', async (req, res) => {
 	try {
-		await User.create(req.body);
+		const { username, password, email } = req.body;
+		await User.create({ username, password, email });
 		res.status(201).json({
-			message: 'New user has been created.'
+			message: 'Új felhasználó sikeresen létrehozva.'
 		});
 	} catch (error) {
-		console.error('Error creating user:', error);
+		console.error('Hiba a felhasználó létrehozásakor:', error);
 		res.status(500).json({
-			error: 'Error creating user.'
+			error: 'Hiba történt a felhasználó létrehozásakor.'
 		});
 	}
 });
