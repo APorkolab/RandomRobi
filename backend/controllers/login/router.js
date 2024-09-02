@@ -116,9 +116,6 @@ router.post('/login', async (req, res) => {
 
     // Jelszó összehasonlítás bcrypt használatával
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Password comparison result:', isMatch); // Debugging célokra
-		console.log('Kapott user jelszó:', password); // Debugging célokra
-		console.log('Hashelt jelszó:', user.password); // Debugging célokra
 		
 
     if (isMatch) {

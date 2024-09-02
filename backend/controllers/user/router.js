@@ -1,9 +1,16 @@
+const express = require('express');
+const router = express.Router();
+const User = require('../../models/user');
+const bcrypt = require('bcrypt');
+
 /**
  * @swagger
  * /user:
  *   post:
  *     summary: Create a new user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -42,14 +49,6 @@
  *                   type: string
  *                   example: Error creating user.
  */
-
-
-
-const express = require('express');
-const router = express.Router();
-const User = require('../../models/user');
-const bcrypt = require('bcrypt');
-
 router.post('/', async (req, res) => {
 	try {
 		await User.create(req.body);
@@ -70,6 +69,8 @@ router.post('/', async (req, res) => {
  *   get:
  *     summary: Retrieve all users
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of users
@@ -100,8 +101,6 @@ router.post('/', async (req, res) => {
  *                   type: string
  *                   example: Error fetching users.
  */
-
-
 router.get('/', async (req, res) => {
 	try {
 		const users = await User.findAll();
@@ -118,6 +117,8 @@ router.get('/', async (req, res) => {
  *   get:
  *     summary: Retrieve a user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -164,8 +165,6 @@ router.get('/', async (req, res) => {
  *                   type: string
  *                   example: Error fetching user.
  */
-
-
 router.get('/:id', async (req, res) => {
 	try {
 		const user = await User.findByPk(req.params.id);
@@ -185,6 +184,8 @@ router.get('/:id', async (req, res) => {
  *   put:
  *     summary: Update a user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -241,7 +242,6 @@ router.get('/:id', async (req, res) => {
  *                   type: string
  *                   example: Error updating user.
  */
-
 router.put('/:id', async (req, res) => {
 	try {
 		const result = await User.update(req.body, {
@@ -272,6 +272,8 @@ router.put('/:id', async (req, res) => {
  *   delete:
  *     summary: Delete a user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -17,7 +17,7 @@
  *                   description: URL of the generated video.
  *                 message:
  *                   type: string
- *                   example: A cron feladat sikeresen lefutott [dátum]kor. Generált videó: [link]
+ *                   example: "A cron feladat sikeresen lefutott [dátum]kor. Generált videó: [link]"
  *                   description: Success message.
  *       500:
  *         description: Something went wrong during the cron job execution.
@@ -28,7 +28,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Something went wrong at [dátum]
+ *                   example: "Something went wrong at [dátum]"
  *                   description: Error message.
  */
 

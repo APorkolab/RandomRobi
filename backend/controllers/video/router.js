@@ -16,6 +16,8 @@ const {
  *   get:
  *     summary: Retrieve all video links from the database
  *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of video links
@@ -63,6 +65,8 @@ router.get('/', async (req, res) => {
  *   post:
  *     summary: Add a new video link to the database
  *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -121,8 +125,10 @@ router.post('/', async (req, res) => {
  * @swagger
  * /video/daily:
  *   post:
- *     summary: Add a new video link to the database
+ *     summary: Add a new daily video link to the database
  *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -192,6 +198,8 @@ router.post('/daily', async (req, res) => {
  *   put:
  *     summary: Update an existing video link in the database
  *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -288,6 +296,8 @@ router.put('/:id', async (req, res) => {
  *   delete:
  *     summary: Delete a video link from the database
  *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -436,6 +446,8 @@ router.get('/random', async (req, res) => {
  *   get:
  *     summary: Retrieve a video link by ID from the database
  *     tags: [Videos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
