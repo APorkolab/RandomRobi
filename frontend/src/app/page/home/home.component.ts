@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { Video } from 'src/app/model/video';
 
 @Component({
   selector: 'app-home',
@@ -33,21 +34,22 @@ export class HomeComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.videoService.getRandomVideo().subscribe(
-      (response: any) => {
+    this.videoService.getRandomVideo().subscribe({
+      next: (response: Video) => {
         this.isLoading = false;
         if (response && response.link) {
-          console.log('Kapott video URL:', response.link);
+          console.log('Received video URL:', response.link);
           this.link = response.link;
         } else {
-          console.error('Érvénytelen videó URL:', response ? response.link : 'undefined');
+          console.error('Invalid video URL:', response ? response.link : 'undefined');
+          this.link = '';
         }
       },
-      (error) => {
+      error: (error) => {
         this.isLoading = false;
-        console.error('Hiba történt a videó betöltése közben:', error);
+        console.error('Error occurred while loading video:', error);
       }
-    );
+    });
   }
 
   triggerRandomVideo(): void {

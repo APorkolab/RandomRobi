@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, timer } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { User } from '../model/user';
@@ -13,9 +13,7 @@ export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
-    this.initAuthCheck();
-  }
+  constructor(private http: HttpClient, private router: Router) { }
 
   login(loginData: { username: string, password: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/login`, loginData);
@@ -50,23 +48,20 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload.exp > Date.now() / 1000;
     } catch (e) {
+      console.error('Invalid token format', e);
       return false;
     }
   }
 
   getUser(): Observable<User> {
+    if (!this.isLoggedIn()) {
+      this.logout();
+      throw new Error('User is not logged in or token has expired');
+    }
     const token = this.getToken();
     return this.http.get<User>(`${environment.apiUrl}/user`, {
       headers: {
         Authorization: `Bearer ${token}`
-      }
-    });
-  }
-
-  private initAuthCheck(): void {
-    timer(0, 60000).subscribe(() => { // Ellenőrzés indításkor és minden percben
-      if (!this.isLoggedIn()) {
-        this.logout();
       }
     });
   }
