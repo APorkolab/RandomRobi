@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { VideoService } from '../../service/video.service';
+import { AuthService } from '../../service/auth.service';
 import { Router } from '@angular/router';
+import { catchError, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { User } from 'src/app/model/user';
+import { VideoService } from 'src/app/service/video.service';
 
 @Component({
   selector: 'app-admin',
@@ -28,16 +29,26 @@ export class AdminComponent implements OnInit {
     { key: 'createdAt', title: 'Created At' }
   ];
 
-  constructor(private videoService: VideoService, private router: Router) { }
+  constructor(
+    private videoService: VideoService,
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
+    this.user$ = this.authService.getUser();
     this.isUserLoggedIn$ = this.user$.pipe(map(user => !!user));
     this.loadVideos();
     this.setupPagination();
   }
 
   loadVideos(): void {
-    this.videos$ = this.videoService.getAllVideos();  // Helyes metódusnév
+    this.videos$ = this.videoService.getAllVideos().pipe(
+      catchError(error => {
+        console.error('Error loading videos:', error);
+        return of([]); // Üres tömböt ad vissza hiba esetén
+      })
+    );
   }
 
   editVideo(video: any): void {
@@ -60,8 +71,14 @@ export class AdminComponent implements OnInit {
 
   setupPagination(): void {
     this.videos$.subscribe(videos => {
-      const pages = Math.ceil(videos.length / 10);
-      this.pageList = Array.from({ length: pages }, (_, i) => i + 1);
+      if (videos.length > 0) {
+        const pages = Math.ceil(videos.length / 10);
+        this.pageList = Array.from({ length: pages }, (_, i) => i + 1);
+      } else {
+        this.pageList = []; // Ha nincs adat, üres oldalszám lista
+      }
+    }, error => {
+      console.error('Error setting up pagination:', error);
     });
   }
 

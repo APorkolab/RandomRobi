@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { User } from '../model/user';
 import { environment } from 'src/environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class UserService {
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser$: Observable<User | null>;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private authService: AuthService) {
     this.currentUserSubject = new BehaviorSubject<User | null>(null);
     this.currentUser$ = this.currentUserSubject.asObservable();
   }
@@ -58,12 +59,14 @@ export class UserService {
   }
 
   // Bejelentkezés
-  login(username: string, password: string): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/login`, { username, password })
+  login(username: string, password: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/login`, { username, password })
       .pipe(
-        tap(user => {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.setCurrentUser(user);
+        tap(response => {
+          if (response && response.token) {
+            this.authService.login(response.token);
+            this.setCurrentUser(response.user);
+          }
         })
       );
   }

@@ -135,8 +135,7 @@ const bcrypt = require('bcrypt');
 
 router.post('/', async (req, res) => {
 	try {
-		const hashedPassword = await hashPassword(req.body.password);
-		await User.create({...req.body, password: hashedPassword});
+		await User.create(req.body);
 		res.status(201).json({
 			message: 'New user has been created.'
 		});
@@ -148,7 +147,7 @@ router.post('/', async (req, res) => {
 	}
 });
 
-router.get('/all', async (req, res) => {
+router.get('/', async (req, res) => {
 	try {
 		const users = await User.findAll();
 		res.json(users);
@@ -173,14 +172,11 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
 	try {
-		const updatedUser = req.body;
-		if (updatedUser.password) {
-			updatedUser.password = await hashPassword(updatedUser.password);
-		}
-		const result = await User.update(updatedUser, {
+		const result = await User.update(req.body, {
 			where: {
 				id: req.params.id
-			}
+			},
+			individualHooks: true
 		});
 		if (result[0] === 0) {
 			return res.status(404).json({
@@ -220,10 +216,5 @@ router.delete('/:id', async (req, res) => {
 		});
 	}
 });
-
-async function hashPassword(password) {
-	const salt = await bcrypt.genSalt(10);
-	return bcrypt.hash(password, salt);
-}
 
 module.exports = router;

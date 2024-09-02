@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
+import { User } from '../model/user';
 
 @Injectable({
   providedIn: 'root'
@@ -7,9 +11,13 @@ import { Router } from '@angular/router';
 export class AuthService {
   private readonly tokenKey = 'authToken';
 
-  constructor(private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
-  login(token: string): void {
+  login(loginData: { username: string, password: string }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/login`, loginData);
+  }
+
+  saveToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
 
@@ -24,5 +32,14 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getUser(): Observable<User> {
+    const token = this.getToken();
+    return this.http.get<User>(`${environment.apiUrl}/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
   }
 }

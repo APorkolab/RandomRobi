@@ -7,8 +7,23 @@ const morgan = require('morgan');
 const sequelize = require('./config/database');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const rateLimit = require('express-rate-limit');
+const { router: loginRouter, adminIps } = require('./controllers/login/router');
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Rate Limiting beállítások
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 perc időablak
+  max: 50, // max 50 kérés IP-nként ezen az időtartamon belül
+  message: "Too many requests from this IP address, try again later.",
+	headers: true,
+  skip: function (req, res) {
+    return adminIps.has(req.ip);
+  }
+});
+// Rate Limiting middleware alkalmazása az összes API végpontra
+app.use(limiter);
 
 // CORS beállítások
 const allowedOrigins = process.env.CORS_ORIGIN 
@@ -97,13 +112,14 @@ app.use(express.static('public'));
 const videoRouter = require('./controllers/video/router');
 const cronRouter = require('./controllers/cron/router');
 const userRouter = require('./controllers/user/router');
-const loginRouter = require('./controllers/login/router');
+// const loginRouter = require('./controllers/login/router');
 
 // Routes setup
 app.use('/video', videoRouter);
 app.use('/cron', cronRouter);
 app.use('/user', require('./models/auth/authenticate'), userRouter);
 app.use('/login', loginRouter);
+app.use('/logout', loginRouter);
 
 // Global error handler
 app.use((err, req, res, next) => {

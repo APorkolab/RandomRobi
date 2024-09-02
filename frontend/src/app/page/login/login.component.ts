@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,16 +13,26 @@ export class LoginComponent {
     password: ''
   };
 
-  constructor(private router: Router) { }
   currentYear: number = new Date().getFullYear();
+
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) { }
+
   onLogin(): void {
-    // Implement authentication logic here, for example, calling an AuthService
-    if (this.loginData.username === 'admin' && this.loginData.password === 'password') {
-      // Redirect to the admin page on successful login
-      this.router.navigate(['/admin']);
-    } else {
-      // Handle login error
-      alert('Invalid username or password');
-    }
+    this.authService.login(this.loginData).subscribe(
+      (response: any) => {
+        if (response && response.accessToken) {
+          this.authService.saveToken(response.accessToken);
+          this.router.navigate(['/admin']);
+        } else {
+          console.error('Hiányzó token a válaszból');
+        }
+      },
+      (error: any) => {
+        console.error('Bejelentkezési hiba:', error);
+      }
+    );
   }
 }

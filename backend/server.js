@@ -16,38 +16,36 @@ const createAdminUser = async () => {
 	const email = process.env.ADMIN_EMAIL || 'admin@example.com';
 	const password = process.env.ADMIN_PASSWORD || 'adminPassword';
 
-	try {
-		const hashedPassword = await bcrypt.hash(password, 10);
+	logger.info(`Kísérlet admin felhasználó létrehozására: ${username}, ${email}`);
 
+	try {
 		const [user, created] = await User.findOrCreate({
 			where: { username },
 			defaults: {
 				username,
-				password: hashedPassword,
+				password, // Eltávolítva a hashelés
 				email
 			}
 		});
 
 		if (created) {
-			logger.info(`Admin felhasználó létrehozva: ${username}, email: ${email}`);
+			logger.info(`Admin felhasználó sikeresen létrehozva: ${username}`);
 		} else {
-			// Csak akkor frissítsük a jelszót, ha az változott
-			if (!(await bcrypt.compare(password, user.password))) {
-				await user.update({ password: hashedPassword });
-				logger.info(`Admin felhasználó jelszava frissítve: ${username}`);
-			} else {
-				logger.info(`Admin felhasználó már létezik: ${username}`);
-			}
+			logger.info(`Admin felhasználó már létezik: ${username}`);
 		}
 	} catch (err) {
 		logger.error(`Admin felhasználó létrehozása sikertelen: ${err.message}`);
-		// Ne állítsuk le a szervert, csak naplózzuk a hibát
+		logger.error(err.stack); // Teljes hibaverem naplózása
 	}
 };
 
 // Body-parser middleware beállítása
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Import and use login router
+const { router } = require('./controllers/login/router');
+app.use('/', router);
 
 // Start the server and create admin user
 const initializeApp = async () => {
