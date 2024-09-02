@@ -10,10 +10,18 @@ import { User } from '../model/user';
 })
 export class AuthService {
   private readonly tokenKey = 'authToken';
-  private isLoggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
+  private isLoggedInSubject = new BehaviorSubject<boolean>(this.checkInitialLoginState());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {
+    this.isLoggedInSubject = new BehaviorSubject<boolean>(this.checkInitialLoginState());
+    this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  }
+
+  private checkInitialLoginState(): boolean {
+    const token = this.getToken();
+    return !!token && this.isTokenValid(token);
+  }
 
   login(loginData: { username: string, password: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/login`, loginData);

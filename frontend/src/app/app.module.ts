@@ -17,7 +17,7 @@ import { FilterPipe } from './pipe/filter.pipe';
 import { JwtInterceptor } from './service/jwt.interceptor';
 import { AuthService } from './service/auth.service';
 import { VideoService } from './service/video.service';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 
 @NgModule({
@@ -39,12 +39,13 @@ import { DatePipe } from '@angular/common';
     BrowserAnimationsModule,
     MatIconModule,
     AppRoutingModule,
+    HttpClientModule,
   ],
   providers: [
-    provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     DatePipe,
     VideoService,
+    AuthService,
   ],
   bootstrap: [AppComponent]
 })
