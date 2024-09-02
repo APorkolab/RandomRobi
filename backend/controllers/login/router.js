@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const Users = require('../../models/user');
 
 const router = express.Router();
-const adminIps = new Set();
 
 /**
  * @swagger
@@ -116,8 +115,7 @@ router.post('/login', async (req, res) => {
 
     // Jelszó összehasonlítás bcrypt használatával
     const isMatch = await bcrypt.compare(password, user.password);
-		
-
+    
     if (isMatch) {
       const accessToken = jwt.sign({
         username: user.username,
@@ -125,8 +123,6 @@ router.post('/login', async (req, res) => {
       }, process.env.JWT_SECRET || 'bociBociTarkaSeFuleSeFarka', {
         expiresIn: '1h'
       });
-
-      adminIps.add(req.ip);
 
       return res.json({
         accessToken,
@@ -153,7 +149,7 @@ router.post('/login', async (req, res) => {
  * @swagger
  * /logout:
  *   post:
- *     summary: Log out a user and remove their IP from the admin list
+ *     summary: Log out a user
  *     tags: [Authentication]
  *     responses:
  *       200:
@@ -165,17 +161,7 @@ router.post('/login', async (req, res) => {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Sikeres kijelentkezés, IP eltávolítva a kivétellistáról
- *       400:
- *         description: Bad Request - IP not found in the exception list
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: IP nem található a kivétellistában
+ *                   example: Sikeres kijelentkezés
  *       500:
  *         description: Internal Server Error - An error occurred during logout
  *         content:
@@ -189,13 +175,7 @@ router.post('/login', async (req, res) => {
  */
 // Kijelentkezési Endpoint
 router.post('/logout', (req, res) => {
-  // Admin IP eltávolítása a kivétellistáról
-  if (adminIps.has(req.ip)) {
-    adminIps.delete(req.ip);
-    return res.json({ message: 'Sikeres kijelentkezés, IP eltávolítva a kivétellistáról' });
-  } else {
-    return res.status(400).json({ message: 'IP nem található a kivétellistában' });
-  }
+  return res.json({ message: 'Sikeres kijelentkezés' });
 });
 
-module.exports = { router, adminIps };
+module.exports = router;

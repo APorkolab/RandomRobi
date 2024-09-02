@@ -9,6 +9,7 @@ const User = require('./models/user');
 const logger = require('./logger/logger');
 const { initCronJob } = require('./services/cronService');
 const sequelize = require('./config/database');
+const loginRouter = require('./controllers/login/router');
 
 // Create admin user on server start
 const createAdminUser = async () => {
@@ -44,8 +45,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Import and use login router
-const { router } = require('./controllers/login/router');
-app.use('/', router);
+app.use('/', loginRouter);
 
 // Start the server and create admin user
 const initializeApp = async () => {
