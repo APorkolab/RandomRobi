@@ -11,7 +11,7 @@ import { debounceTime } from 'rxjs/operators';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  link!: SafeResourceUrl;
+  link: string = '';
   showAdminButton: boolean = false;
   isLoading: boolean = false;
   getRandomVideoClick$ = new Subject<void>();  // Subject a debounce-hoz
@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit {
         this.isLoading = false;
         if (response && response.link) {
           console.log('Kapott video URL:', response.link);
-          this.link = this.sanitizer.bypassSecurityTrustResourceUrl(response.link);
+          this.link = response.link;
         } else {
           console.error('Érvénytelen videó URL:', response ? response.link : 'undefined');
         }

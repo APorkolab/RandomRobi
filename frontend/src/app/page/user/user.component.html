@@ -1,7 +1,9 @@
 <div class="container-fluid">
 	<div class="row">
-		<button *ngIf="(user$ | async)" routerLink="/login" type="button" class="btn btn-danger mb-2">Sign out</button>
-		<button *ngIf="!(user$ | async)" routerLink="/login" type="button" class="btn btn-info mb-2">Sign in</button>
+		<button *ngIf="(isUserLoggedIn$ | async)" routerLink="/login" type="button" class="btn btn-danger mb-2">Sign
+			out</button>
+		<button *ngIf="!(isUserLoggedIn$ | async)" routerLink="/login" type="button" class="btn btn-info mb-2">Sign
+			in</button>
 		<button class="btn btn-primary" [routerLink]="'/user/edit/0'">Create</button>
 		<button routerLink="/admin" type="button" class="btn btn-dark">Go to Video Page</button>
 		<div class="col-md-12">

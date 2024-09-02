@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, timer } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { User } from '../model/user';
@@ -10,8 +10,12 @@ import { User } from '../model/user';
 })
 export class AuthService {
   private readonly tokenKey = 'authToken';
+  private isLoggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
+  isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {
+    this.initAuthCheck();
+  }
 
   login(loginData: { username: string, password: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/login`, loginData);
@@ -19,10 +23,12 @@ export class AuthService {
 
   saveToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
+    this.isLoggedInSubject.next(true);
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    this.isLoggedInSubject.next(false);
     this.router.navigate(['/login']);
   }
 
@@ -53,6 +59,14 @@ export class AuthService {
     return this.http.get<User>(`${environment.apiUrl}/user`, {
       headers: {
         Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  private initAuthCheck(): void {
+    timer(0, 60000).subscribe(() => { // Ellenőrzés indításkor és minden percben
+      if (!this.isLoggedIn()) {
+        this.logout();
       }
     });
   }

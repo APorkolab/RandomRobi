@@ -18,8 +18,8 @@ const routes: Routes = [
   { path: 'users', component: UserComponent, canActivate: [AuthGuardService] },
   { path: 'users/edit/0', component: UserEditorComponent, canActivate: [AuthGuardService] },
   { path: 'user/edit/:id', component: UserEditorComponent, canActivate: [AuthGuardService] },
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
-
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

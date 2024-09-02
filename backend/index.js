@@ -119,6 +119,15 @@ app.use('/user', authenticate, userRouter);
 app.use('/login', loginRouter);
 app.use('/logout', loginRouter);
 
+// Üdvözlő üzenet a gyökér útvonalra
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Üdvözöljük a Random Robi API-ban!',
+    version: '1.0.0',
+    documentation: '/api-docs'
+  });
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
 	logger.error(`Error: ${err.message}`);

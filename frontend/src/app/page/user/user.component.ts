@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { UserService } from '../../service/user.service';
 import { Router } from '@angular/router';
 import { User } from 'src/app/model/user';
+import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-user',
@@ -10,6 +11,7 @@ import { User } from 'src/app/model/user';
   styleUrls: ['./user.component.scss']
 })
 export class UserComponent implements OnInit {
+  isUserLoggedIn$: Observable<boolean>;
   user$!: Observable<User>;
   users$!: Observable<User[]>;
   pageList: number[] = [];
@@ -26,7 +28,9 @@ export class UserComponent implements OnInit {
     { key: 'email', title: 'Email' }
   ];
 
-  constructor(private userService: UserService, private router: Router) { }
+  constructor(private userService: UserService, private router: Router, private authService: AuthService) {
+    this.isUserLoggedIn$ = this.authService.isLoggedIn$;
+  }
 
   ngOnInit(): void {
     this.loadUsers();
