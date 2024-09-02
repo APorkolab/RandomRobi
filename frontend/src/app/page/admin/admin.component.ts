@@ -90,4 +90,9 @@ export class AdminComponent implements OnInit {
       this.sortDir = true;
     }
   }
+
+  onFilterChange(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.phrase = inputElement.value;
+  }
 }

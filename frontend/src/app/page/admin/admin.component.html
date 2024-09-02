@@ -14,9 +14,10 @@
 					<div class="input-group mb-3">
 						<select [(ngModel)]="filterKey" id="tableSearch" class="form-select col-md-3">
 							<option value="">Search in every column</option>
-							<option *ngFor="let key of columns" [value]="key.key">{{ key.title }}</option>
+							<option *ngFor="let column of columns" [value]="column.key">{{ column.title }}</option>
 						</select>
-						<input [(ngModel)]="phrase" type="text" class="form-control col-md-9" placeholder="Search in the data...">
+						<input type="text" [(ngModel)]="phrase" (input)="onFilterChange($event)" class="form-control col-md-9"
+							placeholder="Filter videos...">
 					</div>
 				</div>
 			</div>
@@ -33,12 +34,16 @@
 				</thead>
 				<tbody *ngIf="videos$ | async as videos">
 					<tr
-						*ngFor="let video of videos | slice: startSlice:endSlice | filter:phrase:filterKey | sorter:columnKey:sortDir">
+						*ngFor="let video of (videos || []) | filter:phrase:filterKey | sorter:columnKey:sortDir | slice:startSlice:endSlice">
 						<td>{{ video.id }}</td>
 						<td>{{ video.link }}</td>
-						<td>{{ video.createdAt | date:'short' }}</td>
-						<td><button class="btn btn-primary" (click)="editVideo(video)">Edit</button></td>
-						<td><button class="btn btn-danger" (click)="deleteVideo(video)">Delete</button></td>
+						<td>{{ video.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+						<td>
+							<button (click)="editVideo(video)" class="btn btn-primary btn-sm">Edit</button>
+						</td>
+						<td>
+							<button (click)="deleteVideo(video)" class="btn btn-danger btn-sm ml-2">Delete</button>
+						</td>
 					</tr>
 				</tbody>
 			</table>
