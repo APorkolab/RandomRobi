@@ -21,8 +21,10 @@ const adminIps = new Set();
  *             properties:
  *               username:
  *                 type: string
+ *                 example: johndoe
  *               password:
  *                 type: string
+ *                 example: password123
  *     responses:
  *       200:
  *         description: Successful login
@@ -33,19 +35,62 @@ const adminIps = new Set();
  *               properties:
  *                 accessToken:
  *                   type: string
+ *                   description: JWT token for the authenticated user
  *                 user:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: integer
+ *                       description: User ID
+ *                       example: 1
  *                     username:
  *                       type: string
+ *                       description: Username of the authenticated user
+ *                       example: johndoe
  *                     email:
  *                       type: string
+ *                       description: Email of the authenticated user
+ *                       example: johndoe@example.com
+ *       400:
+ *         description: Bad Request - Username and password are required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Felhasználónév és jelszó megadása kötelező
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized - Incorrect password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Helytelen jelszó
  *       404:
- *         description: User not found
+ *         description: Not Found - User does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: A felhasználó nem létezik
+ *       500:
+ *         description: Internal Server Error - An error occurred during login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Hiba történt a bejelentkezés során
  */
 // Bejelentkezési Endpoint
 router.post('/login', async (req, res) => {
@@ -123,10 +168,27 @@ router.post('/login', async (req, res) => {
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: Sikeres kijelentkezés, IP eltávolítva a kivétellistáról
  *       400:
- *         description: IP not found in the exception list
+ *         description: Bad Request - IP not found in the exception list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: IP nem található a kivétellistában
  *       500:
- *         description: Server error
+ *         description: Internal Server Error - An error occurred during logout
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Szerver hiba történt a kijelentkezés során
  */
 // Kijelentkezési Endpoint
 router.post('/logout', (req, res) => {

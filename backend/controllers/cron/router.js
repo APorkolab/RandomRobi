@@ -7,9 +7,31 @@
  *     responses:
  *       200:
  *         description: The cron job has been successfully applied.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 link:
+ *                   type: string
+ *                   description: URL of the generated video.
+ *                 message:
+ *                   type: string
+ *                   example: A cron feladat sikeresen lefutott [dátum]kor. Generált videó: [link]
+ *                   description: Success message.
  *       500:
  *         description: Something went wrong during the cron job execution.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong at [dátum]
+ *                   description: Error message.
  */
+
 const express = require('express');
 const router = express.Router();
 const {

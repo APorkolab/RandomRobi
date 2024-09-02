@@ -3,6 +3,23 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const saltRounds = 10;
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         username:
+ *           type: string
+ *         password:
+ *           type: string
+ *         email:
+ *           type: string
+ */
+
 const User = sequelize.define('User', {
     username: {
         type: DataTypes.STRING,

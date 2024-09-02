@@ -55,16 +55,21 @@ const swaggerOptions = {
 		info: {
 			title: "Random Robi API",
 			version: "1.0.0",
-			description: "API documentation for the Random Robi project",
+			description: "API documentation for the RandomRobi YouTube-scraper project",
 			contact: {
-				name: "Adam",
-				email: "adam@example.com"
+				name: "Adam Dr. Porkolab",
 			}
 		},
-		servers: [{
-			url: "http://localhost:3000",
-			description: "Local server"
-		}]
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "Local server"
+      },
+      {
+        url: "https://www.api.randomrobi.porkolab.hu",
+        description: "Production server"
+      }
+    ]
 	},
 	apis: ["./routes/*.js", "./controllers/**/*.js"]
 };
@@ -141,6 +146,7 @@ const startServer = async () => {
 
 		app.listen(port, () => {
 			logger.info(`App listening at http://localhost:${port}`);
+			logger.info(`Swagger docs available at http://localhost:${port}/api-docs`);
 		});
 	} catch (error) {
 		logger.error(`Unable to start the server: ${error.message}`);

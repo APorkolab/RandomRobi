@@ -94,4 +94,12 @@ export class VideoEditorComponent implements OnInit {
   private toISODateTimeString(date: Date): string {
     return this.datePipe.transform(date, 'yyyy-MM-ddTHH:mm') || '';
   }
+
+  transformLink(link: string): void {
+    const youtubeRegex = /^(https?:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+/;
+    if (youtubeRegex.test(link)) {
+      const videoId = link.split('v=')[1] || link.split('/').pop();
+      this.video.link = `https://www.youtube.com/embed/${videoId}`;
+    }
+  }
 }

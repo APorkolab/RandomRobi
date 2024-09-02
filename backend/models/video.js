@@ -22,4 +22,19 @@ const Video = sequelize.define("Video", {
 	timestamps: false
 });
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Video:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         link:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ */
 module.exports = Video;

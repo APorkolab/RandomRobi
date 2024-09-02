@@ -13,121 +13,38 @@
  *             properties:
  *               username:
  *                 type: string
+ *                 example: johndoe
  *               password:
  *                 type: string
+ *                 example: password123
  *               email:
  *                 type: string
+ *                 example: johndoe@example.com
  *     responses:
  *       201:
  *         description: New user has been created
- *       500:
- *         description: Error creating user
- */
-
-/**
- * @swagger
- * /user/all:
- *   get:
- *     summary: Retrieve all users
- *     tags: [Users]
- *     responses:
- *       200:
- *         description: A list of users
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                   username:
- *                     type: string
- *                   email:
- *                     type: string
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: New user has been created.
  *       500:
- *         description: Error fetching users
+ *         description: Error creating user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error creating user.
  */
 
-/**
- * @swagger
- * /user/{id}:
- *   get:
- *     summary: Retrieve a user by ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The ID of the user to retrieve
- *     responses:
- *       200:
- *         description: The user information
- *       404:
- *         description: User not found
- *       500:
- *         description: Error fetching user
- */
 
-/**
- * @swagger
- * /user/{id}:
- *   put:
- *     summary: Update a user by ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The ID of the user to update
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: The user has been updated
- *       404:
- *         description: User not found
- *       500:
- *         description: Error updating user
- */
 
-/**
- * @swagger
- * /user/{id}:
- *   delete:
- *     summary: Delete a user by ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The ID of the user to delete
- *     responses:
- *       200:
- *         description: The user has been deleted
- *       404:
- *         description: User not found
- *       500:
- *         description: Error deleting user
- */
 const express = require('express');
 const router = express.Router();
 const User = require('../../models/user');
@@ -147,6 +64,44 @@ router.post('/', async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /user:
+ *   get:
+ *     summary: Retrieve all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: A list of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   username:
+ *                     type: string
+ *                     example: johndoe
+ *                   email:
+ *                     type: string
+ *                     example: johndoe@example.com
+ *       500:
+ *         description: Error fetching users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error fetching users.
+ */
+
+
 router.get('/', async (req, res) => {
 	try {
 		const users = await User.findAll();
@@ -156,6 +111,60 @@ router.get('/', async (req, res) => {
 		res.status(500).send('Error fetching users');
 	}
 });
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   get:
+ *     summary: Retrieve a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: true
+ *         description: The ID of the user to retrieve
+ *     responses:
+ *       200:
+ *         description: The user information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 username:
+ *                   type: string
+ *                   example: johndoe
+ *                 email:
+ *                   type: string
+ *                   example: johndoe@example.com
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Error fetching user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error fetching user.
+ */
+
 
 router.get('/:id', async (req, res) => {
 	try {
@@ -169,6 +178,69 @@ router.get('/:id', async (req, res) => {
 		res.status(500).send('Error fetching user');
 	}
 });
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   put:
+ *     summary: Update a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: true
+ *         description: The ID of the user to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: johndoe_updated
+ *               password:
+ *                 type: string
+ *                 example: newpassword123
+ *               email:
+ *                 type: string
+ *                 example: johndoe_updated@example.com
+ *     responses:
+ *       200:
+ *         description: The user has been updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: The user has been updated.
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Error updating user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error updating user.
+ */
 
 router.put('/:id', async (req, res) => {
 	try {
@@ -194,6 +266,52 @@ router.put('/:id', async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /user/{id}:
+ *   delete:
+ *     summary: Delete a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: true
+ *         description: The ID of the user to delete
+ *     responses:
+ *       200:
+ *         description: The user has been deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: The user has been deleted.
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Error deleting user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error deleting user.
+ */
 router.delete('/:id', async (req, res) => {
 	try {
 		const result = await User.destroy({

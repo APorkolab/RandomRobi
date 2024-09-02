@@ -1,5 +1,15 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
 module.exports = (req, res, next) => {
 	const authHeader = req.headers.authorization;
 

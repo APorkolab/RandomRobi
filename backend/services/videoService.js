@@ -105,7 +105,8 @@ async function generateRandomLink() {
                 const link = await getRandomYouTubeVideoEmbedLink(keyword);
 
                 if (link) {
-                    return { link };
+                    const newVideo = await addLinkToDatabase(link);
+                    return { link: newVideo.link };
                 }
 
                 await delay(RETRY_DELAY);
@@ -113,12 +114,16 @@ async function generateRandomLink() {
             }
 
             // Ha nem sikerül linket szerezni, adjuk vissza a Rick Astley linket
-            return { link: 'https://www.youtube.com/embed/dQw4w9WgXcQ' };
+            const fallbackLink = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+            await addLinkToDatabase(fallbackLink);
+            return { link: fallbackLink };
 
         } catch (error) {
             logger.error('Error generating video URL:', error);
             // Ha hiba történik, adjuk vissza a Rick Astley linket
-            return { link: 'https://www.youtube.com/embed/dQw4w9WgXcQ' };
+            const fallbackLink = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+            await addLinkToDatabase(fallbackLink);
+            return { link: fallbackLink };
         } finally {
             isGeneratingVideo = false;
             pendingPromise = null; // Reseteljük a pending promise-t a folyamat végén
@@ -154,7 +159,7 @@ const getLastVideoLink = async () => {
         } else {
             const { link } = await generateRandomLink();
             const newVideo = await addLinkToDatabase(link);
-            return newVideo.toJSON();
+            return newVideo;
         }
     } catch (error) {
         logger.error('Error fetching the last video link:', error);

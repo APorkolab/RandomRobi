@@ -23,7 +23,7 @@ const createAdminUser = async () => {
 			where: { username },
 			defaults: {
 				username,
-				password, // Eltávolítva a hashelés
+				password,
 				email
 			}
 		});
