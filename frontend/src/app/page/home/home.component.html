@@ -1,40 +1,36 @@
-<div class="background">
-	<div class="main">
-		<div class="content">
-			<div class="container">
-				<div class="row justify-content-center">
-					<div class="col-12 d-flex justify-content-center">
-						<div class="rrlogo-container">
-							<img src="assets/img/rrlogo.png" alt="Random Robi Logo" class="img-fluid neon-border">
-						</div>
-					</div>
-				</div>
-				<div class="video-container my-4">
-					<iframe class="embed-responsive-item" [src]="link | safe" allowfullscreen></iframe>
-				</div>
-				<button class="btn btn-crazy btn-lg w-100 mt-5 fw-bold glitch" (click)="triggerRandomVideo()"
-					[disabled]="isLoading">
-					<span *ngIf="isLoading">Loading...</span>
-					<span *ngIf="!isLoading">Gimme some weird YT sh*t, dude!</span>
-				</button>
-				<div class="alert alert-warning mt-3 neon-text funky-font">
-					<strong>Note:</strong> New random video generation is not available while a video is playing...
-					(even if you keep pressing the button recklessly at the wrong time.)
-				</div>
-			</div>
-			<footer class="mt-5 mb-3 text-center text-muted neon-text">
-				<div id="authorName">
-					©{{ currentYear }}
-					<a href="https://www.adamporkolab.hu" class="neon-text" aria-label="Visit Ádám Dr. Porkoláb's website">
-						Ádám Dr. Porkoláb
-					</a>
-				</div>
-				<div class="logo-container mt-2">
-					<img src="assets/img/logo.png" alt="Author Logo" class="neon-border">
-				</div>
-			</footer>
-			<br><br>
-			<button class="btn btn-admin" *ngIf="showAdminButton" (click)="onAdminClick()">Admin</button>
-		</div>
-	</div>
+<div class="home-container">
+  <div class="rrlogo-container">
+    <img src="assets/img/rrlogo.png" alt="Random Robi Logo" class="img-fluid neon-border">
+  </div>
+
+  <div class="video-container">
+    <iframe class="embed-responsive-item" [src]="link | safe" allowfullscreen></iframe>
+  </div>
+
+  <button mat-raised-button class="btn-crazy btn-lg w-100 mt-5 fw-bold glitch" (click)="triggerRandomVideo()"
+    [disabled]="isLoading">
+    <span *ngIf="isLoading">Loading...</span>
+    <span *ngIf="!isLoading">Gimme some weird YT sh*t, dude!</span>
+  </button>
+
+  <mat-card class="info-card funky-font">
+    <mat-card-content>
+      <strong>Note:</strong> New random video generation is not available while a video is playing...
+      (even if you keep pressing the button recklessly at the wrong time.)
+    </mat-card-content>
+  </mat-card>
+
+  <footer class="mt-5 mb-3 text-center text-muted neon-text">
+    <div id="authorName">
+      ©{{ currentYear }}
+      <a href="https://www.adamporkolab.hu" class="neon-text" aria-label="Visit Ádám Dr. Porkoláb's website">
+        Ádám Dr. Porkoláb
+      </a>
+    </div>
+    <div class="logo-container mt-2">
+      <img src="assets/img/logo.png" alt="Author Logo" class="neon-border">
+    </div>
+  </footer>
+
+  <button mat-button class="btn-admin" *ngIf="showAdminButton" (click)="onAdminClick()">Admin</button>
 </div>

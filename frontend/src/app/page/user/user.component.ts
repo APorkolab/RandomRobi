@@ -1,59 +1,56 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UserService } from '../../service/user.service';
 import { Router } from '@angular/router';
 import { User } from 'src/app/model/user';
 import { AuthService } from 'src/app/service/auth.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss']
 })
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit, AfterViewInit {
   isUserLoggedIn$: Observable<boolean>;
-  user$!: Observable<User>;
-  users$!: Observable<User[]>;
-  pageList: number[] = [];
-  page = 1;
-  startSlice = 0;
-  endSlice = 10;
-  phrase = '';
-  filterKey = '';
-  columnKey = '';
-  sortDir: boolean = true;
-  columns = [
-    { key: 'id', title: 'ID' },
-    { key: 'username', title: 'Username' },
-    { key: 'email', title: 'Email' }
-  ];
+  dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
+  displayedColumns: string[] = ['id', 'username', 'email', 'actions'];
 
-  constructor(private userService: UserService, private router: Router, private authService: AuthService) {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(
+    private userService: UserService,
+    private router: Router,
+    private authService: AuthService
+  ) {
     this.isUserLoggedIn$ = this.authService.isLoggedIn$;
   }
 
   ngOnInit(): void {
     this.loadUsers();
-    this.setupPagination();
   }
 
-  setupPagination(): void {
-    this.users$.subscribe(users => {
-      const totalItems = users.length;
-      const itemsPerPage = 10;
-      const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-      this.pageList = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-      if (this.page > totalPages) {
-        this.page = totalPages;
-        this.jumptoPage(this.page);
-      }
-    });
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   loadUsers(): void {
-    this.users$ = this.userService.getAllUsers();
+    this.userService.getAllUsers().subscribe(users => {
+      this.dataSource.data = users;
+    });
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   editUser(user: User): void {
@@ -63,23 +60,8 @@ export class UserComponent implements OnInit {
   deleteUser(user: User): void {
     if (confirm(`Are you sure you want to delete the user with ID ${user.id}?`)) {
       this.userService.handleUser('delete', user).subscribe(() => {
-        this.loadUsers();
+        this.loadUsers(); // Reload data after deletion
       });
-    }
-  }
-
-  jumptoPage(pageNum: number): void {
-    this.page = pageNum;
-    this.startSlice = (pageNum - 1) * 10;
-    this.endSlice = this.startSlice + 10;
-  }
-
-  onColumnSelect(columnKey: string): void {
-    if (this.columnKey === columnKey) {
-      this.sortDir = !this.sortDir;
-    } else {
-      this.columnKey = columnKey;
-      this.sortDir = true;
     }
   }
 }

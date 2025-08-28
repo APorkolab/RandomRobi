@@ -1,1 +1,26 @@
+.container-fluid {
+  padding: 20px;
+}
 
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.mat-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+.mat-elevation-z8 {
+  width: 100%;
+}
+
+.mat-row:hover {
+    background-color: rgba(0,0,0,0.04);
+}

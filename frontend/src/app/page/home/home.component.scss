@@ -1,32 +1,6 @@
 $primary-color: #F8C300;
 $footer-height: 80px;
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Press Start 2P', cursive;
-  color: #FFF;
-  background: radial-gradient(circle, #2c3e50, #000000),
-    url("../../../assets/img/background.png") no-repeat center center fixed;
-  background-size: cover;
-  overflow-x: hidden;
-}
-
-h1 {
-  font-size: 4rem;
-  font-weight: 700;
-  color: #FF00FF;
-  text-shadow: 4px 4px #00FFFF, -2px -2px #FF00FF;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  line-height: 1.2;
-}
-
 .video-container {
   position: relative;
   padding-bottom: 56.25%;
@@ -34,6 +8,8 @@ h1 {
   overflow: hidden;
   border: 5px solid #FF00FF;
   box-shadow: 0px 0px 20px 10px #00FFFF;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .video-container iframe {
@@ -44,19 +20,12 @@ h1 {
   height: 100%;
 }
 
-.container {
+.home-container {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  min-height: calc(100vh - #{$footer-height});
-  z-index: 2;
-}
-
-.main {
-  flex: 1;
-  position: relative;
-  z-index: 1;
-  padding-bottom: 7%;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 footer {
@@ -75,19 +44,6 @@ footer {
   align-items: center;
   margin-top: 2rem;
   /* Extra margin az alsó távolság növelésére */
-}
-
-.background {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("../../../assets/img/background.png");
-  background-repeat: repeat;
-  background-size: cover;
-  overflow-y: hidden;
-  padding-bottom: calc($footer-height + 4rem);
 }
 
 #authorName {
@@ -171,13 +127,14 @@ button.glitch {
   }
 }
 
-.alert-warning {
-  background-color: rgba(255, 0, 255, 0.2);
+.info-card {
+  background-color: rgba(255, 0, 255, 0.2) !important; /* Use !important to override mat-card background */
   border: 1px solid #FF00FF;
-  color: #FFF;
+  color: #FFF !important; /* Use !important to override mat-card text color */
   box-shadow: 0px 0px 10px #FF00FF, 0px 0px 10px #00FFFF;
   font-family: 'Orbitron', sans-serif;
   animation: neon-glow 1.5s ease-in-out infinite alternate;
+  margin-top: 1.5rem;
 }
 
 button.btn-admin {

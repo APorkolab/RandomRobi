@@ -1,43 +1,41 @@
-<div class="row">
-	<div class="col-12 d-flex justify-content-center text-center">
-		<div class="card">
-			<div class="card-header card-header-primary">
-				<h4 class="card-title" *ngIf="video.id !== 0; else addVideo">Edit the data of the YouTube video</h4>
-				<ng-template #addVideo>
-					<h4 class="card-title">Add a new YouTube video</h4>
-				</ng-template>
-			</div>
-			<div class="card-body">
-				<form #videoForm="ngForm">
-					<input type="hidden" name="id" [(ngModel)]="video.id">
+<div class="editor-container" *ngIf="video$ | async as video; else loading">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ video.id && video.id !== 0 ? 'Edit Video' : 'Create New Video' }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="videoForm" (ngSubmit)="onSave()">
+        <mat-form-field class="w-100">
+          <mat-label>YouTube Video Link</mat-label>
+          <input matInput formControlName="link" required>
+          <mat-error *ngIf="videoForm.get('link')?.invalid && videoForm.get('link')?.touched">
+            Please enter a valid YouTube video link.
+          </mat-error>
+        </mat-form-field>
 
-					<h3 class="h5 text-secondary">Video link *</h3>
-					<div class="form-group">
-						<input type="text" class="form-control" name="link" [(ngModel)]="video.link" (ngModelChange)="transformLink($event)" required
-							pattern="^(https?:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+">
-						<div *ngIf="videoForm.controls['link']?.invalid && videoForm.controls['link']?.touched"
-							class="alert alert-danger" role="alert">
-							The video link must be a valid YouTube link and start with either 'https://www.youtube.com/' or
-							'https://youtu.be/'.
-						</div>
-					</div>
+        <mat-form-field class="w-100">
+          <mat-label>Creation Date</mat-label>
+          <input matInput formControlName="createdAt" type="datetime-local" required>
+          <mat-hint>If left empty, the system will use the current timestamp.</mat-hint>
+          <mat-error *ngIf="videoForm.get('createdAt')?.invalid && videoForm.get('createdAt')?.touched">
+            Please enter a valid date.
+          </mat-error>
+        </mat-form-field>
 
-					<h3 class="h5 text-secondary">Created at *</h3>
-					<div class="form-group">
-						<input type="datetime-local" class="form-control" name="createdAt" [(ngModel)]="createdAtString"
-							min="2000-01-01T00:00" max="2100-12-31T23:59">
-						<small class="form-text text-muted">If a timestamp is provided, the system will use that. If left empty, the
-							system will use the current timestamp.</small>
-					</div>
-
-					<button *ngIf="video.id !== 0" (click)="onUpdate(video)" [disabled]="videoForm.invalid" type="submit"
-						class="btn btn-primary pull-right me-md-3">Update data of YouTube video</button>
-					<button *ngIf="video.id === 0" (click)="onCreate(video)" [disabled]="videoForm.invalid" type="submit"
-						class="btn btn-primary pull-right me-md-3">Create data of YouTube video</button>
-					<button routerLink="/admin" type="button" class="btn btn-danger pull-left">Cancel edit</button>
-					<div class="clearfix"></div>
-				</form>
-			</div>
-		</div>
-	</div>
+        <div class="button-row">
+          <button mat-flat-button color="primary" type="submit" [disabled]="videoForm.invalid">
+            {{ video.id && video.id !== 0 ? 'Update' : 'Create' }}
+          </button>
+          <button mat-stroked-button color="warn" routerLink="/admin">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </div>
+
+<ng-template #loading>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+    <p>Loading video data...</p>
+  </div>
+</ng-template>
