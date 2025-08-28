@@ -1,5 +1,4 @@
 const axios = require('axios');
-const puppeteer = require('puppeteer');
 const Video = require('../models/video');
 const moment = require('moment');
 const {
@@ -10,8 +9,6 @@ const logger = require('../logger/logger');
 
 let isGeneratingVideo = false;
 let pendingPromise = null;
-let browserInstance = null;
-let pageInstance = null;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -25,46 +22,24 @@ async function getRandomKeyword() {
     }
 }
 
-async function initializeBrowser() {
-    if (!browserInstance) {
-        browserInstance = await puppeteer.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-software-rasterizer',
-                '--window-size=1280,720',
-            ],
-            defaultViewport: {
-                width: 1280,
-                height: 720
-            }
-        });
-        pageInstance = await browserInstance.newPage();
-        await pageInstance.setRequestInterception(true);
-        pageInstance.on('request', (req) => {
-            if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
-    }
-}
-
 async function getRandomYouTubeVideoEmbedLink(keyword) {
     try {
-        await pageInstance.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(keyword)}`, {
-            waitUntil: 'domcontentloaded'
-        });
+        const response = await axios.get(`https://www.youtube.com/results?search_query=${encodeURIComponent(keyword)}`);
+        const html = response.data;
 
-        await pageInstance.waitForSelector('ytd-video-renderer a#video-title', { timeout: 10000 });
+        // Find the ytInitialData JSON
+        const match = html.match(/var ytInitialData = (.*?);<\/script>/);
+        if (!match || !match[1]) {
+            logger.warn(`No ytInitialData found for keyword: ${keyword}`);
+            return null;
+        }
 
-        const videoLinks = await pageInstance.$$eval('ytd-video-renderer a#video-title', links =>
-            links.map(link => link.href).filter(link => link.includes('watch?v='))
-        );
+        const ytInitialData = JSON.parse(match[1]);
+        const contents = ytInitialData.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents;
+
+        const videoLinks = contents
+            .filter(item => item.videoRenderer)
+            .map(item => item.videoRenderer.videoId);
 
         if (videoLinks.length === 0) {
             logger.warn(`No videos found for keyword: ${keyword}`);
@@ -72,9 +47,7 @@ async function getRandomYouTubeVideoEmbedLink(keyword) {
         }
 
         const randomIndex = Math.floor(Math.random() * videoLinks.length);
-        const videoUrl = videoLinks[randomIndex];
-        const videoIdMatch = videoUrl.match(/v=([^&]+)/);
-        const videoId = videoIdMatch ? videoIdMatch[1] : null;
+        const videoId = videoLinks[randomIndex];
 
         if (!videoId) {
             throw new Error('Failed to extract video ID');
@@ -90,15 +63,13 @@ async function getRandomYouTubeVideoEmbedLink(keyword) {
 async function generateRandomLink() {
     if (isGeneratingVideo) {
         logger.warn("Video generation already in progress. Returning pending promise.");
-        return pendingPromise; // Visszatér az éppen folyamatban lévő ígérettel
+        return pendingPromise;
     }
 
     isGeneratingVideo = true;
 
     pendingPromise = (async () => {
         try {
-            await initializeBrowser();
-
             let tries = 0;
             while (tries < MAX_TRIES) {
                 const keyword = await getRandomKeyword();
@@ -113,20 +84,18 @@ async function generateRandomLink() {
                 tries++;
             }
 
-            // Ha nem sikerül linket szerezni, adjuk vissza a Rick Astley linket
             const fallbackLink = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
             await addLinkToDatabase(fallbackLink);
             return { link: fallbackLink };
 
         } catch (error) {
             logger.error('Error generating video URL:', error);
-            // Ha hiba történik, adjuk vissza a Rick Astley linket
             const fallbackLink = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
             await addLinkToDatabase(fallbackLink);
             return { link: fallbackLink };
         } finally {
             isGeneratingVideo = false;
-            pendingPromise = null; // Reseteljük a pending promise-t a folyamat végén
+            pendingPromise = null;
         }
     })();
 

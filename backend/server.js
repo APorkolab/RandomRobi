@@ -40,20 +40,12 @@ const createAdminUser = async () => {
 	}
 };
 
-// Body-parser middleware beállítása
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Import and use login router
-app.use('/', loginRouter);
-
 // Start the server and create admin user
 const initializeApp = async () => {
 	try {
 		await sequelize.sync({ force: true }); // Ez törli és újra létrehozza a táblákat
 		await startServer(); // Start server first and sync tables
 		await createAdminUser(); // Then create the admin user
-		logger.info('Body-parser sikeresen beállítva');
 	} catch (err) {
 		logger.error(`Alkalmazás indítása sikertelen: ${err.message}`);
 		process.exit(1);
