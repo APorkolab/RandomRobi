@@ -7,9 +7,10 @@ import { switchMap, tap } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-user-editor',
-  templateUrl: './user-editor.component.html',
-  styleUrls: ['./user-editor.component.scss']
+    selector: 'app-user-editor',
+    templateUrl: './user-editor.component.html',
+    styleUrls: ['./user-editor.component.scss'],
+    standalone: false
 })
 export class UserEditorComponent implements OnInit {
   user$!: Observable<User>;

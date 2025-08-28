@@ -8,9 +8,10 @@ import { DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-video-editor',
-  templateUrl: './video-editor.component.html',
-  styleUrls: ['./video-editor.component.scss']
+    selector: 'app-video-editor',
+    templateUrl: './video-editor.component.html',
+    styleUrls: ['./video-editor.component.scss'],
+    standalone: false
 })
 export class VideoEditorComponent implements OnInit {
   video$!: Observable<Video>;

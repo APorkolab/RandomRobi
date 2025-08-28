@@ -9,9 +9,10 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.component.html',
-  styleUrls: ['./user.component.scss']
+    selector: 'app-user',
+    templateUrl: './user.component.html',
+    styleUrls: ['./user.component.scss'],
+    standalone: false
 })
 export class UserComponent implements OnInit, AfterViewInit {
   isUserLoggedIn$: Observable<boolean>;
