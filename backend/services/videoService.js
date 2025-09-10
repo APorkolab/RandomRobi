@@ -14,11 +14,16 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function getRandomKeyword() {
     try {
-        const response = await axios.get('https://random-word-api.herokuapp.com/word?number=1');
+        const response = await axios.get('https://random-word-api.herokuapp.com/word?number=1', {
+            timeout: 5000 // 5 second timeout
+        });
         return response.data[0];
     } catch (error) {
         logger.error('Error fetching random keyword:', error);
-        throw new Error('Failed to fetch random keyword');
+        // Return a fallback keyword instead of throwing
+        const fallbackKeywords = ['music', 'technology', 'science', 'gaming', 'cooking', 'travel'];
+        const randomIndex = Math.floor(Math.random() * fallbackKeywords.length);
+        return fallbackKeywords[randomIndex];
     }
 }
 

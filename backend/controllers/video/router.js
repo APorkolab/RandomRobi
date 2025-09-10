@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authenticate = require('../../middlewares/authenticate');
 const {
 	getLastVideoLink,
 	generateRandomLink,
@@ -49,7 +50,7 @@ const {
  *                   type: string
  *                   example: "Error retrieving video links."
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
 	try {
 		const rows = await getAllLinksFromDatabase();
 		res.send(rows);
@@ -110,7 +111,7 @@ router.get('/', async (req, res) => {
  *                   type: string
  *                   example: "Error creating video"
  */
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
     try {
         const { link, createdAt } = req.body;
         const newVideo = await addLinkToDatabase(link, createdAt);
@@ -178,7 +179,7 @@ router.post('/', async (req, res) => {
  *                   type: string
  *                   example: "Error adding video link."
  */
-router.post('/daily', async (req, res) => {
+router.post('/daily', authenticate, async (req, res) => {
 	try {
 		const { link, createdAt } = req.body;
 		const record = await addLinkToDatabase(link, createdAt);
@@ -267,7 +268,7 @@ router.post('/daily', async (req, res) => {
  *                   type: string
  *                   example: "Error updating video link."
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const existingVideo = await getByIdFromDatabase(id);
@@ -338,7 +339,7 @@ router.put('/:id', async (req, res) => {
  *                   type: string
  *                   example: "Error deleting video link."
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
 	try {
 		const id = parseInt(req.params.id, 10);
 		const existingVideo = await getByIdFromDatabase(id);
@@ -498,7 +499,7 @@ router.get('/random', async (req, res) => {
  *                   type: string
  *                   example: "Database connection error"
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
 	try {
 		const id = parseInt(req.params.id, 10);
 		const video = await getByIdFromDatabase(id);

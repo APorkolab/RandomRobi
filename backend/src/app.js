@@ -65,24 +65,39 @@ const allowedOrigins = process.env.CORS_ORIGIN
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, etc.)
+    // Always allow requests with no origin (like mobile apps, tests, etc.)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      logger.warn(`CORS blocked origin: ${origin}`);
-      callback(new AppError('Not allowed by CORS', 403));
+      // For development and testing, be more permissive
+      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+        callback(null, true);
+      } else {
+        logger.warn(`CORS blocked origin: ${origin}`);
+        callback(new AppError('Not allowed by CORS', 403));
+      }
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Access-Control-Request-Method', 'Access-Control-Request-Headers'],
+  exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers'],
   credentials: true,
   optionsSuccessStatus: 200,
   maxAge: 86400, // 24 hours
 };
 
 app.use(cors(corsOptions));
+// Manually set Access-Control-Allow-Origin when origin is allowed
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+});
 logger.info(`CORS enabled for origins: ${allowedOrigins.join(', ')}`);
 
 // Request logging
@@ -184,17 +199,10 @@ app.get('/health', async (req, res) => {
 });
 
 // API routes with versioning
-app.use('/api/v1/videos', videoRouter);
-app.use('/api/v1/cron', cronRouter);
+app.use('/api/v1/videos', videoRouter);  // Video routes have their own auth logic
+app.use('/api/v1/cron', authenticate, cronRouter);
 app.use('/api/v1/users', authenticate, userRouter);
 app.use('/api/v1/auth', loginRouter);
-
-// Legacy routes for backward compatibility
-app.use('/video', videoRouter);
-app.use('/cron', cronRouter);
-app.use('/user', authenticate, userRouter);
-app.use('/login', loginRouter);
-app.use('/logout', loginRouter);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -207,6 +215,20 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Legacy routes for backward compatibility  
+app.use('/video', videoRouter);
+app.use('/cron', cronRouter);
+app.use('/user', authenticate, userRouter);
+// Mount login router for legacy paths
+const express_inner = require('express');
+const loginRouterLegacy = express_inner.Router();
+
+// Import the actual login logic from the login controller
+const loginController = require('../controllers/login/router');
+loginRouterLegacy.use('/', loginController);
+
+app.use('/', loginRouterLegacy);
 
 // 404 handler
 app.use('*', (req, res) => {

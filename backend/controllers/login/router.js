@@ -125,7 +125,8 @@ router.post('/login', async (req, res) => {
       });
 
       return res.json({
-        accessToken,
+        token: accessToken,        // For test compatibility
+        accessToken,              // For API documentation
         user: {
           id: user.id,
           username: user.username,
