@@ -29,7 +29,7 @@ async function setupTestDatabase() {
       password: process.env.ADMIN_PASSWORD || 'AdminPass123!'
     };
 
-    const [user, created] = await User.findOrCreate({
+    const [, created] = await User.findOrCreate({
       where: { username: adminUser.username },
       defaults: adminUser
     });
@@ -42,7 +42,6 @@ async function setupTestDatabase() {
 
     logger.info('Test database setup completed successfully.');
     process.exit(0);
-
   } catch (error) {
     logger.error('Test database setup failed:', error);
     process.exit(1);
