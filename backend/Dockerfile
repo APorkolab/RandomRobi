@@ -10,7 +10,8 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont \
     nodejs \
-    yarn
+    yarn \
+    curl
 
 # Állítsuk be a Puppeteer futtatásához szükséges környezeti változót
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
@@ -30,7 +31,24 @@ COPY . .
 # Nyissuk meg a 3000-es portot a konténeren belül
 EXPOSE 3000
 
-# Állítsuk be az indítási parancsot a konténer számára
-CMD ["npm", "start"]
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
 
-ENV CREATE_TABLES=true
+# Change ownership of the app directory
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV CREATE_TABLES=false
+
+# Start the application
+CMD ["npm", "start"]

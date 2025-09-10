@@ -1,9 +1,7 @@
 const { DataTypes, Model } = require('sequelize');
 const bcrypt = require('bcrypt');
-const sequelize = require('../config/database');
-
-// Fallback configuration if config is not available
-const BCRYPT_ROUNDS = process.env.BCRYPT_ROUNDS || 12;
+const { sequelize } = require('../config/database');
+const config = require('../config/environment');
 
 /**
  * User model with enhanced security and validation
@@ -14,11 +12,6 @@ class User extends Model {
    */
   async comparePassword(password) {
     return bcrypt.compare(password, this.password);
-  }
-
-  // Legacy method for backward compatibility
-  async validPassword(password) {
-    return this.comparePassword(password);
   }
 
   /**
@@ -125,15 +118,33 @@ User.init({
     defaultValue: true,
   },
   
+  emailVerified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  
   lastLoginAt: {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
 }, {
   sequelize,
   modelName: 'User',
-  tableName: 'User', // Keep original table name for compatibility
-  timestamps: false, // Keep as false for compatibility
+  tableName: 'users',
+  timestamps: true,
   
   // Indexes for performance
   indexes: [
@@ -150,6 +161,9 @@ User.init({
     },
     {
       fields: ['isActive'],
+    },
+    {
+      fields: ['createdAt'],
     },
   ],
   
@@ -179,6 +193,12 @@ User.init({
         role: 'admin',
       },
     },
+    
+    verified: {
+      where: {
+        emailVerified: true,
+      },
+    },
   },
   
   // Hooks
@@ -186,7 +206,7 @@ User.init({
     // Hash password before creating user
     beforeCreate: async (user) => {
       if (user.password) {
-        const salt = await bcrypt.genSalt(parseInt(BCRYPT_ROUNDS));
+        const salt = await bcrypt.genSalt(config.security.bcryptRounds);
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
@@ -194,12 +214,33 @@ User.init({
     // Hash password before updating user
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
-        const salt = await bcrypt.genSalt(parseInt(BCRYPT_ROUNDS));
+        const salt = await bcrypt.genSalt(config.security.bcryptRounds);
         user.password = await bcrypt.hash(user.password, salt);
+      }
+    },
+    
+    // Validate password strength before save
+    beforeValidate: (user) => {
+      if (user.password && user.changed('password')) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(user.password)) {
+          throw new Error('Password must contain at least one lowercase letter, one uppercase letter, and one digit');
+        }
       }
     },
   },
 });
+
+/**
+ * Associations
+ */
+User.associate = (models) => {
+  // User has many videos (if tracking who created videos)
+  // User.hasMany(models.Video, {
+  //   foreignKey: 'createdBy',
+  //   as: 'createdVideos',
+  // });
+};
 
 /**
  * Class methods
@@ -227,32 +268,8 @@ User.createAdmin = async function(userData) {
     ...userData,
     role: 'admin',
     isActive: true,
+    emailVerified: true,
   });
 };
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *         username:
- *           type: string
- *         password:
- *           type: string
- *         email:
- *           type: string
- *         role:
- *           type: string
- *           enum: [admin, user]
- *         isActive:
- *           type: boolean
- *         lastLoginAt:
- *           type: string
- *           format: date-time
- */
 
 module.exports = User;

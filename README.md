@@ -1,15 +1,59 @@
-# Random Robi - Full-Stack YouTube Video Generator
+# 🎬 Random Robi - Enterprise YouTube Video Generator
 
-Random Robi is a full-stack web application designed to generate and display random YouTube video links. It features a modern Angular frontend, a robust Node.js/Express backend, and is fully containerized with Docker for easy setup and deployment.
+[![CI/CD Pipeline](https://github.com/dr-porkolabadam/RandomRobi/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/dr-porkolabadam/RandomRobi/actions/workflows/ci-cd.yml)
+[![Coverage](https://codecov.io/gh/dr-porkolabadam/RandomRobi/branch/main/graph/badge.svg)](https://codecov.io/gh/dr-porkolabadam/RandomRobi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Key Features
+> **Senior+++ Enterprise-Grade Full-Stack Application** for generating and managing random YouTube video content with advanced features, security, and scalability.
 
-- **Random Video Generation**: Fetches random YouTube videos using a Puppeteer-based web scraping service.
-- **Modern UI**: A clean, responsive user interface built with the latest version of Angular and Angular Material.
-- **Authenticated Routes**: Secure admin sections for managing users and videos, protected by JWT-based authentication.
-- **API Documentation**: Integrated Swagger UI for clear, interactive API documentation.
-- **Containerized Environment**: Docker-compose setup for one-command startup of both frontend and backend services.
-- **Robust Backend**: Built with Express and Sequelize, featuring rate limiting, error handling, and automated admin user creation.
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/dr-porkolabadam/RandomRobi.git
+cd RandomRobi
+
+# Setup environment
+cp backend/.env.example backend/.env
+# Edit backend/.env with your configuration
+
+# Start with Docker (Recommended)
+docker-compose up --build
+
+# Or start manually
+cd backend && npm install && npm run dev
+cd frontend && npm install && npm start
+```
+
+**Access Points:**
+- 🌐 Frontend: http://localhost:4200
+- 🔧 Backend API: http://localhost:3000
+- 📚 API Documentation: http://localhost:3000/api-docs
+- 🏥 Health Check: http://localhost:3000/health
+
+## ✨ Features
+
+### 🎯 Core Features
+- **Random Video Generation**: Intelligent YouTube video discovery using web scraping
+- **Advanced User Management**: Role-based access control (Admin/User)
+- **Video Analytics**: View tracking, ratings, favorites, and categorization
+- **Smart Caching**: Multi-level caching with circuit breaker pattern
+- **Real-time Health Monitoring**: Comprehensive health checks and metrics
+
+### 🔐 Security Features
+- **JWT Authentication**: Secure token-based authentication
+- **Password Security**: Bcrypt with configurable rounds
+- **Input Validation**: Comprehensive Joi-based validation
+- **XSS Protection**: Input sanitization and output encoding
+- **Rate Limiting**: Configurable rate limiting per endpoint
+- **Helmet Security**: Security headers and CORS protection
+
+### ⚡ Performance Features
+- **Database Connection Pooling**: Optimized database connections
+- **Response Compression**: Gzip compression for API responses
+- **Caching Strategy**: Redis-compatible caching with fallback
+- **Query Optimization**: Indexed database queries
+- **Lazy Loading**: Frontend lazy loading and OnPush detection
 
 ---
 
