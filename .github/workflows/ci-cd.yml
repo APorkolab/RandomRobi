@@ -110,6 +110,22 @@ jobs:
             sleep 1
           done
 
+      - name: Setup test database
+        run: |
+          cd backend
+          npm run test:setup
+        env:
+          NODE_ENV: test
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_NAME: randomrobi_test
+          DB_USER: testuser
+          DB_PASSWORD: testpassword
+          JWT_SECRET: test-jwt-secret-key-for-github-actions-minimum-32-chars
+          ADMIN_USERNAME: admin
+          ADMIN_EMAIL: admin@randomrobi.com
+          ADMIN_PASSWORD: AdminPass123!
+
       - name: Run tests
         run: |
           cd backend
@@ -122,6 +138,9 @@ jobs:
           DB_USER: testuser
           DB_PASSWORD: testpassword
           JWT_SECRET: test-jwt-secret-key-for-github-actions-minimum-32-chars
+          ADMIN_USERNAME: admin
+          ADMIN_EMAIL: admin@randomrobi.com
+          ADMIN_PASSWORD: AdminPass123!
           
       - name: Generate coverage report
         run: |

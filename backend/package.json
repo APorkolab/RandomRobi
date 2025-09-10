@@ -7,6 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "NODE_ENV=test mocha --exit --recursive test/",
+    "test:setup": "NODE_ENV=test node scripts/setup-test-db.js",
+    "test:with-setup": "npm run test:setup && npm run test",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "nyc npm run test",
     "lint": "eslint . --ext .js --ignore-pattern node_modules/",
