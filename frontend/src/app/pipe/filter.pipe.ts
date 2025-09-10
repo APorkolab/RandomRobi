@@ -13,7 +13,7 @@ export class FilterPipe implements PipeTransform {
 
     return value.filter(item => {
       if (key && item && typeof item === 'object') {
-        const itemValue = (item as any)[key]?.toString().toLowerCase();
+        const itemValue = (item as Record<string, unknown>)[key]?.toString().toLowerCase();
         return itemValue?.includes(searchTerm.toLowerCase());
       } else if (item && typeof item === 'object') {
         return Object.values(item).some(val =>

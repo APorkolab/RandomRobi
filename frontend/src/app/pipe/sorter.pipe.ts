@@ -16,13 +16,17 @@ export class SorterPipe implements PipeTransform {
         return 0;
       }
       
-      const aValue = (a as any)[key];
-      const bValue = (b as any)[key];
+      const aValue = (a as Record<string, unknown>)[key];
+      const bValue = (b as Record<string, unknown>)[key];
 
-      if (aValue < bValue) {
+      // Convert to comparable values
+      const aComparable = String(aValue);
+      const bComparable = String(bValue);
+
+      if (aComparable < bComparable) {
         return ascending ? -1 : 1;
       }
-      if (aValue > bValue) {
+      if (aComparable > bComparable) {
         return ascending ? 1 : -1;
       }
       return 0;
