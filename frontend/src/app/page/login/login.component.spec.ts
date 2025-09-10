@@ -22,9 +22,9 @@ describe('LoginComponent', () => {
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
-        BrowserAnimationsModule
-      ],
-      declarations: [ LoginComponent ]
+        BrowserAnimationsModule,
+        LoginComponent
+      ]
     })
     .compileComponents();
 

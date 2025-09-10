@@ -24,9 +24,9 @@ describe('UserEditorComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,
-        BrowserAnimationsModule
-      ],
-      declarations: [ UserEditorComponent ]
+        BrowserAnimationsModule,
+        UserEditorComponent
+      ]
     })
     .compileComponents();
 

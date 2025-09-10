@@ -1,34 +1,45 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UserService } from '../../service/user.service';
 import { Router } from '@angular/router';
 import { User } from 'src/app/model/user';
 import { AuthService } from 'src/app/service/auth.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-user',
     templateUrl: './user.component.html',
     styleUrls: ['./user.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        RouterModule
+    ]
 })
 export class UserComponent implements OnInit, AfterViewInit {
-  isUserLoggedIn$: Observable<boolean>;
+  private userService = inject(UserService);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
+  isUserLoggedIn$: Observable<boolean> = this.authService.isLoggedIn$;
   dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
   displayedColumns: string[] = ['id', 'username', 'email', 'actions'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-
-  constructor(
-    private userService: UserService,
-    private router: Router,
-    private authService: AuthService
-  ) {
-    this.isUserLoggedIn$ = this.authService.isLoggedIn$;
-  }
 
   ngOnInit(): void {
     this.loadUsers();

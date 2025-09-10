@@ -15,10 +15,8 @@ describe('WildcardGuard', () => {
         RouterTestingModule.withRoutes([
           { path: 'home', component: HomeComponent },
           { path: 'login', component: LoginComponent }
-        ])
-      ],
-      declarations: [
-        HomeComponent, // We need to declare them since we are not importing their modules
+        ]),
+        HomeComponent,
         LoginComponent
       ],
       providers: [WildcardGuard]

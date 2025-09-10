@@ -3,7 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
     name: 'filter',
     pure: true,
-    standalone: false
+    standalone: true
 })
 export class FilterPipe implements PipeTransform {
   transform(value: unknown[], searchTerm: string, key?: string): unknown[] {
@@ -12,14 +12,15 @@ export class FilterPipe implements PipeTransform {
     }
 
     return value.filter(item => {
-      if (key) {
-        const itemValue = item[key]?.toString().toLowerCase();
+      if (key && item && typeof item === 'object') {
+        const itemValue = (item as any)[key]?.toString().toLowerCase();
         return itemValue?.includes(searchTerm.toLowerCase());
-      } else {
+      } else if (item && typeof item === 'object') {
         return Object.values(item).some(val =>
           val?.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
+      return false;
     });
   }
 }

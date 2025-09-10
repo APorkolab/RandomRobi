@@ -37,9 +37,9 @@ describe('AdminComponent', () => {
         MatPaginatorModule,
         MatFormFieldModule,
         MatInputModule,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        AdminComponent
       ],
-      declarations: [ AdminComponent ],
       providers: [
         { provide: AuthService, useValue: mockAuthService }
       ]

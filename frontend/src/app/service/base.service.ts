@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BaseService {
-  constructor(protected http: HttpClient) { }
+  protected http = inject(HttpClient);
 
   protected get<T>(url: string) {
     return this.http.get<T>(url);

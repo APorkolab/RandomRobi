@@ -1,25 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { VideoService } from '../../service/video.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Video } from 'src/app/model/video';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { SafePipe } from '../../pipe/safe.pipe';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatButtonModule,
+        SafePipe
+    ]
 })
 export class HomeComponent implements OnInit {
+  private videoService = inject(VideoService);
+  private sanitizer = inject(DomSanitizer);
+  private router = inject(Router);
+
   link = '';
   showAdminButton = false;
   isLoading = false;
   getRandomVideoClick$ = new Subject<void>();  // Subject a debounce-hoz
   currentYear: number = new Date().getFullYear();
-
-  constructor(private videoService: VideoService, private sanitizer: DomSanitizer, private router: Router) { }
 
   ngOnInit(): void {
     this.getRandomVideoClick$

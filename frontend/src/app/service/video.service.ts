@@ -17,7 +17,7 @@ export class VideoService extends BaseService {
   }
 
   getLatestVideo(): Observable<Video> {
-    return this.http.get(`${this.apiEndpoint}/latest`);
+    return this.http.get<Video>(`${this.apiEndpoint}/latest`);
   }
 
   // Egy videó lekérése ID alapján

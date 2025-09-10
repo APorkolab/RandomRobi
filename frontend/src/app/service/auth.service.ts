@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -9,14 +9,12 @@ import { User } from '../model/user';
   providedIn: 'root'
 })
 export class AuthService {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
   private readonly tokenKey = 'authToken';
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.checkInitialLoginState());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
-
-  constructor(private http: HttpClient, private router: Router) {
-    this.isLoggedInSubject = new BehaviorSubject<boolean>(this.checkInitialLoginState());
-    this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
-  }
 
   private checkInitialLoginState(): boolean {
     const token = this.getToken();

@@ -25,9 +25,9 @@ describe('VideoEditorComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        VideoEditorComponent
       ],
-      declarations: [ VideoEditorComponent ],
       providers: [DatePipe]
     })
     .compileComponents();

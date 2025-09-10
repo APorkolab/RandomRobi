@@ -14,9 +14,7 @@ describe('AppComponent', () => {
         MatToolbarModule,
         MatSidenavModule,
         BrowserAnimationsModule,
-        CommonModule
-      ],
-      declarations: [
+        CommonModule,
         AppComponent
       ],
     }).compileComponents();

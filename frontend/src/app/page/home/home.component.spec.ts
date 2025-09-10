@@ -11,8 +11,7 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ HttpClientTestingModule, MatCardModule, RouterTestingModule ],
-      declarations: [ HomeComponent, SafePipe ]
+      imports: [ HttpClientTestingModule, MatCardModule, RouterTestingModule, HomeComponent, SafePipe ]
     })
     .compileComponents();
 

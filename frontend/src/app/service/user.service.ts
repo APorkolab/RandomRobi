@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -10,13 +10,11 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class UserService {
-  private currentUserSubject: BehaviorSubject<User | null>;
-  public currentUser$: Observable<User | null>;
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-    this.currentUserSubject = new BehaviorSubject<User | null>(null);
-    this.currentUser$ = this.currentUserSubject.asObservable();
-  }
+  private currentUserSubject: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
+  public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
   // User műveletek kezelése egy metódusban
   handleUser(action: 'get' | 'create' | 'update' | 'delete', user?: User): Observable<User[] | User | void> {
@@ -72,8 +70,8 @@ export class UserService {
       .pipe(
         tap(response => {
           if (response && response.token) {
-            this.authService.login(response.token);
-            this.setCurrentUser(response.user);
+            this.authService.saveToken(response.token);
+            this.setCurrentUser(response.user || null);
           }
         })
       );

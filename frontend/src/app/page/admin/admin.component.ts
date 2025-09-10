@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { AuthService } from '../../service/auth.service';
 import { Router } from '@angular/router';
 import { catchError, map } from 'rxjs/operators';
@@ -6,17 +6,36 @@ import { Observable, of } from 'rxjs';
 import { User } from 'src/app/model/user';
 import { VideoService } from 'src/app/service/video.service';
 import { Video } from 'src/app/model/video';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-admin',
     templateUrl: './admin.component.html',
     styleUrls: ['./admin.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        RouterModule
+    ]
 })
 export class AdminComponent implements OnInit, AfterViewInit {
+  private videoService = inject(VideoService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   user$!: Observable<User>;
   isUserLoggedIn$: Observable<boolean> = new Observable<boolean>();
   dataSource: MatTableDataSource<Video> = new MatTableDataSource<Video>();
@@ -24,12 +43,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-
-  constructor(
-    private videoService: VideoService,
-    private authService: AuthService,
-    private router: Router
-  ) { }
 
   ngOnInit(): void {
     this.user$ = this.authService.getUser();

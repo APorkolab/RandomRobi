@@ -24,9 +24,9 @@ describe('UserComponent', () => {
         MatPaginatorModule,
         MatFormFieldModule,
         MatInputModule,
-        BrowserAnimationsModule
-      ],
-      declarations: [ UserComponent ]
+        BrowserAnimationsModule,
+        UserComponent
+      ]
     })
     .compileComponents();
 
