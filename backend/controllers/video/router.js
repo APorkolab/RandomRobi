@@ -9,7 +9,9 @@ const {
   addLinkToDatabase,
   updateLinkInDatabase,
   deleteLinkFromDatabase,
-  getByIdFromDatabase
+  getByIdFromDatabase,
+  getCacheStats,
+  clearCache
 } = require('../../services/videoService');
 
 /**
@@ -511,6 +513,55 @@ router.get('/:id', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Error retrieving video link:', error);
     res.status(500).json({ error: 'Error retrieving video link', details: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /video/cache/stats:
+ *   get:
+ *     summary: Get cache statistics (admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cache statistics
+ */
+router.get('/cache/stats', authenticate, (req, res) => {
+  try {
+    const stats = getCacheStats();
+    res.json({
+      message: 'Cache statistics retrieved successfully',
+      stats
+    });
+  } catch (error) {
+    console.error('Error retrieving cache stats:', error);
+    res.status(500).json({ error: 'Error retrieving cache statistics' });
+  }
+});
+
+/**
+ * @swagger
+ * /video/cache/clear:
+ *   post:
+ *     summary: Clear all caches (admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Caches cleared successfully
+ */
+router.post('/cache/clear', authenticate, (req, res) => {
+  try {
+    clearCache();
+    res.json({
+      message: 'All caches cleared successfully'
+    });
+  } catch (error) {
+    console.error('Error clearing caches:', error);
+    res.status(500).json({ error: 'Error clearing caches' });
   }
 });
 

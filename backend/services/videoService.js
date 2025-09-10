@@ -1,4 +1,3 @@
-const axios = require('axios');
 const moment = require('moment');
 const Video = require('../models/video');
 const {
@@ -6,7 +5,7 @@ const {
   RETRY_DELAY
 } = require('../config/constants');
 const logger = require('../logger/logger');
-const { getRandomWord } = require('../utils/wordGenerator');
+const videoCacheService = require('./videoCacheService');
 
 let isGeneratingVideo = false;
 let pendingPromise = null;
@@ -21,94 +20,11 @@ const delay = (ms) => new Promise((resolve) => {
 });
 
 async function getRandomKeyword() {
-  try {
-    // Try Datamuse API first (free, reliable, no API key needed)
-    const patterns = [
-      'a*', 'b*', 'c*', 'd*', 'e*', 'f*', 'g*', 'h*',
-      'i*', 'j*', 'k*', 'l*', 'm*', 'n*', 'o*', 'p*',
-      'r*', 's*', 't*', 'u*', 'v*', 'w*'
-    ];
-    const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
-    const maxWords = Math.floor(Math.random() * 100) + 50; // Get 50-150 words
-
-    const response = await axios.get(`https://api.datamuse.com/words?sp=${randomPattern}&max=${maxWords}`, {
-      timeout: 5000
-    });
-
-    if (response.data && response.data.length > 0) {
-      const randomIndex = Math.floor(Math.random() * response.data.length);
-      const keyword = response.data[randomIndex].word;
-      logger.info(`Generated random keyword from Datamuse API: ${keyword}`);
-      return keyword;
-    }
-
-    // Fallback to local word generator if API doesn't return results
-    const localKeyword = getRandomWord();
-    logger.info(`Using local word generator fallback: ${localKeyword}`);
-    return localKeyword;
-  } catch (error) {
-    logger.warn('Datamuse API unavailable, using local word generator:', error.message);
-
-    // Fallback to local word generator
-    try {
-      const localKeyword = getRandomWord();
-      logger.info(`Using local word generator: ${localKeyword}`);
-      return localKeyword;
-    } catch (localError) {
-      logger.error('Error with local word generator:', localError);
-      // Final fallback to hardcoded keywords
-      const fallbackKeywords = [
-        'music', 'technology', 'science', 'gaming', 'cooking',
-        'travel', 'art', 'sports', 'nature', 'history'
-      ];
-      const randomIndex = Math.floor(Math.random() * fallbackKeywords.length);
-      const fallbackKeyword = fallbackKeywords[randomIndex];
-      logger.info(`Using hardcoded fallback keyword: ${fallbackKeyword}`);
-      return fallbackKeyword;
-    }
-  }
+  return videoCacheService.getRandomKeyword();
 }
 
 async function getRandomYouTubeVideoEmbedLink(keyword) {
-  try {
-    const response = await axios.get(
-      `https://www.youtube.com/results?search_query=${encodeURIComponent(keyword)}`
-    );
-    const html = response.data;
-
-    // Find the ytInitialData JSON
-    const match = html.match(/var ytInitialData = (.*?);<\/script>/);
-    if (!match || !match[1]) {
-      logger.warn(`No ytInitialData found for keyword: ${keyword}`);
-      return null;
-    }
-
-    const ytInitialData = JSON.parse(match[1]);
-    const { contents } = ytInitialData
-      .contents.twoColumnSearchResultsRenderer
-      .primaryContents.sectionListRenderer.contents[0].itemSectionRenderer;
-
-    const videoLinks = contents
-      .filter((item) => item.videoRenderer)
-      .map((item) => item.videoRenderer.videoId);
-
-    if (videoLinks.length === 0) {
-      logger.warn(`No videos found for keyword: ${keyword}`);
-      return null;
-    }
-
-    const randomIndex = Math.floor(Math.random() * videoLinks.length);
-    const videoId = videoLinks[randomIndex];
-
-    if (!videoId) {
-      throw new Error('Failed to extract video ID');
-    }
-
-    return `https://www.youtube.com/embed/${videoId}`;
-  } catch (error) {
-    logger.error('Error retrieving video link:', error.message);
-    return null;
-  }
+  return videoCacheService.getYouTubeVideo(keyword);
 }
 
 async function generateRandomLink() {
@@ -121,6 +37,15 @@ async function generateRandomLink() {
 
   pendingPromise = (async () => {
     try {
+      // First, try to get a random cached video (fastest option)
+      const cachedVideo = videoCacheService.getRandomCachedVideo();
+      if (cachedVideo) {
+        const newVideo = await addLinkToDatabase(cachedVideo);
+        logger.info('Used cached video for fast response');
+        return { link: newVideo.link };
+      }
+
+      // If no cached video, generate new one with smart rate limiting
       let tries = 0;
       while (tries < MAX_TRIES) {
         // eslint-disable-next-line no-await-in-loop
@@ -131,17 +56,21 @@ async function generateRandomLink() {
         if (link) {
           // eslint-disable-next-line no-await-in-loop
           const newVideo = await addLinkToDatabase(link);
+          logger.info(`Generated new video with rate-limited API calls: ${keyword}`);
           return { link: newVideo.link };
         }
 
+        // Reduced retry delay since we have smarter caching now
         // eslint-disable-next-line no-await-in-loop
         await delay(RETRY_DELAY);
         // eslint-disable-next-line no-plusplus
         tries++;
       }
 
+      // Final fallback
       const fallbackLink = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
       const newFallbackVideo = await addLinkToDatabase(fallbackLink);
+      logger.info('Used final fallback video');
       return { link: newFallbackVideo.link };
     } catch (error) {
       logger.error('Error generating video URL:', error);
@@ -231,5 +160,8 @@ module.exports = {
   getLastVideoLink,
   updateLinkInDatabase,
   deleteLinkFromDatabase,
-  generateAndStoreRandomVideo
+  generateAndStoreRandomVideo,
+  // Cache management functions
+  getCacheStats: () => videoCacheService.getCacheStats(),
+  clearCache: () => videoCacheService.clearCache()
 };
