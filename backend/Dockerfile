@@ -1,5 +1,5 @@
 # Használjuk a Node.js Alpine verzióját, ami egy könnyű Linux disztribúció
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Telepítsük a Puppeteer futtatásához szükséges függőségeket
 RUN apk add --no-cache \
