@@ -8,6 +8,7 @@
 require('dotenv').config();
 const sequelize = require('../config/database');
 const User = require('../models/user');
+const Video = require('../models/video'); // Import Video model
 const logger = require('../logger/logger');
 
 async function setupTestDatabase() {
