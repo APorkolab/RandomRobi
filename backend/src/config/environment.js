@@ -22,7 +22,7 @@ const envSchema = Joi.object({
   ADMIN_PASSWORD: Joi.string().min(8).required(),
 
   // External APIs
-  RANDOM_WORD_API_URL: Joi.string().uri().default('https://random-word-api.herokuapp.com'),
+  DATAMUSE_API_URL: Joi.string().uri().default('https://api.datamuse.com'),
   YOUTUBE_BASE_URL: Joi.string().uri().default('https://www.youtube.com'),
 
   // Rate limiting
@@ -78,7 +78,7 @@ module.exports = {
   },
 
   externalApis: {
-    randomWordApiUrl: envVars.RANDOM_WORD_API_URL,
+    datamuseApiUrl: envVars.DATAMUSE_API_URL,
     youtubeBaseUrl: envVars.YOUTUBE_BASE_URL,
   },
 

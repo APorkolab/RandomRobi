@@ -4,6 +4,7 @@ import { AppComponent } from './app.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -12,7 +13,8 @@ describe('AppComponent', () => {
         RouterTestingModule,
         MatToolbarModule,
         MatSidenavModule,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        CommonModule
       ],
       declarations: [
         AppComponent
