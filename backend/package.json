@@ -10,7 +10,7 @@
     "test:setup": "NODE_ENV=test node scripts/setup-test-db.js",
     "test:with-setup": "npm run test:setup && npm run test",
     "test:watch": "npm run test -- --watch",
-    "test:coverage": "nyc npm run test",
+    "test:coverage": "NODE_ENV=test nyc npm run test",
     "lint": "eslint . --ext .js --ignore-pattern node_modules/",
     "lint:fix": "eslint . --ext .js --fix --ignore-pattern node_modules/",
     "docker:build": "docker build -t randomrobi-backend .",
