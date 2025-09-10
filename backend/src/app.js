@@ -8,16 +8,16 @@ const morgan = require('morgan');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-const logger = require('./logger/logger');
+const logger = require('../logger/logger');
 const { AppError } = require('./utils/errors');
-const rateLimiter = require('./middlewares/rateLimiting');
-const authenticate = require('./middlewares/authenticate');
+const rateLimiter = require('../middlewares/rateLimiting');
+const authenticate = require('../middlewares/authenticate');
 
 // Import routers
-const videoRouter = require('./controllers/video/router');
-const cronRouter = require('./controllers/cron/router');
-const userRouter = require('./controllers/user/router');
-const loginRouter = require('./controllers/login/router');
+const videoRouter = require('../controllers/video/router');
+const cronRouter = require('../controllers/cron/router');
+const userRouter = require('../controllers/user/router');
+const loginRouter = require('../controllers/login/router');
 
 const app = express();
 
@@ -142,7 +142,7 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ['./src/controllers/**/*.js', './src/models/**/*.js'],
+  apis: [__dirname + '/../controllers/**/*.js', __dirname + '/../models/**/*.js'],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -154,8 +154,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
-    const { healthCheck } = require('./config/database');
-    const dbHealth = await healthCheck();
+    const sequelize = require('../config/database');
+    await sequelize.authenticate();
+    const dbHealth = {
+      status: 'healthy',
+      message: 'Database connection is healthy',
+      timestamp: new Date().toISOString(),
+    };
     
     const health = {
       status: 'healthy',

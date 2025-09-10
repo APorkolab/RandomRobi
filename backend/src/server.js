@@ -9,10 +9,10 @@
 require('dotenv').config();
 
 const app = require('./app');
-const logger = require('./logger/logger');
-const { initializeDatabase, closeDatabase } = require('./config/database');
-const User = require('./models/user');
-const { initCronJob } = require('./services/cronService');
+const logger = require('../logger/logger');
+const sequelize = require('../config/database');
+const User = require('../models/user');
+const { initCronJob } = require('../services/cronService');
 
 // Server configuration
 const PORT = process.env.PORT || 3000;
@@ -78,7 +78,16 @@ const initializeApp = async () => {
 
     // Initialize database connection and sync models
     logger.info('Initializing database...');
-    await initializeDatabase();
+    await sequelize.authenticate();
+    logger.info('Database connection established successfully');
+    
+    if (process.env.CREATE_TABLES === 'true') {
+      await sequelize.sync({ force: true });
+      logger.info('Database tables created (force: true)');
+    } else {
+      await sequelize.sync({ alter: false });
+      logger.info('Database tables synchronized');
+    }
 
     // Create admin user
     logger.info('Setting up admin user...');
@@ -110,7 +119,7 @@ const initializeApp = async () => {
         logger.info('HTTP server closed');
         
         try {
-          await closeDatabase();
+          await sequelize.close();
           logger.info('Database connections closed');
           logger.info('Graceful shutdown completed');
           process.exit(0);

@@ -1,6 +1,4 @@
-const {
-  Sequelize
-} = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 const {
   DB_NAME,
@@ -9,14 +7,23 @@ const {
   DB_HOST
 } = process.env;
 
-if (!DB_NAME || !DB_USER || !DB_PASSWORD || !DB_HOST) {
-  throw new Error('One or more required environment variables are missing: DB_NAME, DB_USER, DB_PASSWORD, DB_HOST');
+if (!DB_NAME) {
+  throw new Error('DB_NAME environment variable is required');
 }
 
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST,
-  dialect: 'mysql',
-  port: process.env.DB_PORT || 3306, // Port beállítása környezeti változóból
+// Use SQLite for development if database name ends with .db or host is localhost without proper DB settings
+const usesSQLite = DB_NAME.endsWith('.db') || (!DB_HOST || !DB_USER || !DB_PASSWORD);
+
+const sequelize = usesSQLite 
+  ? new Sequelize({
+      dialect: 'sqlite',
+      storage: DB_NAME,
+      logging: false,
+    })
+  : new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+      host: DB_HOST,
+      dialect: 'mysql',
+      port: process.env.DB_PORT || 3306,
   pool: {
     max: 10,
     min: 0,

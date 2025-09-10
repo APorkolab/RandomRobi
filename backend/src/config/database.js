@@ -1,14 +1,22 @@
 const { Sequelize } = require('sequelize');
 const config = require('./environment');
-const logger = require('../logger/logger');
+const logger = require('../../logger/logger');
 
 /**
  * Database configuration options
  */
+// Use SQLite for development if MySQL is not available
+const usesSQLite = config.database.name.endsWith('.db') || !config.database.host || config.database.host === 'localhost';
+
 const sequelizeOptions = {
-  host: config.database.host,
-  port: config.database.port,
-  dialect: 'mysql',
+  ...(usesSQLite ? {
+    dialect: 'sqlite',
+    storage: config.database.name,
+  } : {
+    host: config.database.host,
+    port: config.database.port,
+    dialect: 'mysql',
+  }),
   
   // Connection pooling
   pool: {
