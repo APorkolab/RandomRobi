@@ -12,12 +12,12 @@ describe('SafePipe', () => {
         {
           provide: DomSanitizer,
           useValue: {
-            sanitize: (ctx: any, val: any) => val,
-            bypassSecurityTrustHtml: (val: any) => val,
-            bypassSecurityTrustStyle: (val: any) => val,
-            bypassSecurityTrustScript: (val: any) => val,
-            bypassSecurityTrustUrl: (val: any) => val,
-            bypassSecurityTrustResourceUrl: (val: any) => val,
+            sanitize: (ctx: unknown, val: unknown) => val,
+            bypassSecurityTrustHtml: (val: unknown) => val,
+            bypassSecurityTrustStyle: (val: unknown) => val,
+            bypassSecurityTrustScript: (val: unknown) => val,
+            bypassSecurityTrustUrl: (val: unknown) => val,
+            bypassSecurityTrustResourceUrl: (val: unknown) => val,
           },
         },
       ],

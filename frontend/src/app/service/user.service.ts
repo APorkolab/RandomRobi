@@ -19,9 +19,9 @@ export class UserService {
   }
 
   // User műveletek kezelése egy metódusban
-  handleUser(action: 'get' | 'create' | 'update' | 'delete', user?: User): Observable<any> {
-    let url = `${environment.apiUrl}/user`;
-    let request$: Observable<any>;
+  handleUser(action: 'get' | 'create' | 'update' | 'delete', user?: User): Observable<User[] | User | void> {
+    const url = `${environment.apiUrl}/user`;
+    let request$: Observable<User[] | User | void>;
 
     switch (action) {
       case 'get':
@@ -67,8 +67,8 @@ export class UserService {
   }
 
   // Bejelentkezés
-  login(username: string, password: string): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/login`, { username, password })
+  login(username: string, password: string): Observable<{token?: string, user?: User}> {
+    return this.http.post<{token?: string, user?: User}>(`${environment.apiUrl}/login`, { username, password })
       .pipe(
         tap(response => {
           if (response && response.token) {

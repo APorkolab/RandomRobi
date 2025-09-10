@@ -7,7 +7,6 @@ import { VideoEditorComponent } from './page/video-editor/video-editor.component
 import { UserComponent } from './page/user/user.component';
 import { UserEditorComponent } from './page/user-editor/user-editor.component';
 import { AuthGuardService } from './service/auth-guard.service';
-import { WildcardGuard } from './wildcard.guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },

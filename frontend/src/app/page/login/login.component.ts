@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
     }
 
     this.authService.login(this.loginForm.value).subscribe(
-      (response: any) => {
+      (response: {accessToken?: string}) => {
         if (response && response.accessToken) {
           this.authService.saveToken(response.accessToken);
           this.router.navigate(['/admin']);
@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
           // Optionally: display an error message to the user
         }
       },
-      (error: any) => {
+      (error: unknown) => {
         console.error('Login error:', error);
         // Optionally: display an error message to the user
       }

@@ -11,11 +11,11 @@ export class BaseService {
     return this.http.get<T>(url);
   }
 
-  protected post<T>(url: string, data: any) {
+  protected post<T>(url: string, data: unknown) {
     return this.http.post<T>(url, data);
   }
 
-  protected put<T>(url: string, data: any) {
+  protected put<T>(url: string, data: unknown) {
     return this.http.put<T>(url, data);
   }
 

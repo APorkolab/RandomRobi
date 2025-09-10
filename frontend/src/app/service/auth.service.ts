@@ -23,7 +23,7 @@ export class AuthService {
     return !!token && this.isTokenValid(token);
   }
 
-  login(loginData: { username: string, password: string }): Observable<any> {
+  login(loginData: { username: string, password: string }): Observable<{accessToken?: string}> {
     return this.http.post(`${environment.apiUrl}/login`, loginData);
   }
 

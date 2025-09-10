@@ -7,9 +7,7 @@ import { Component, OnInit } from '@angular/core';
     standalone: false
 })
 export class SidebarComponent implements OnInit {
-  isSidebarOpen: boolean = true;
-
-  constructor() { }
+  isSidebarOpen = true;
 
   ngOnInit(): void {
     this.checkInitialSidebarState();

@@ -25,7 +25,7 @@ describe('AdminComponent', () => {
     // Provide a default mock return value for getUser
     const mockUser: User = { id: 1, username: 'test', email: 'test@test.com', password: '' };
     (mockAuthService.getUser as jasmine.Spy).and.returnValue(of(mockUser));
-    (mockAuthService.isLoggedIn$ as any) = of(true);
+    (mockAuthService.isLoggedIn$ as unknown) = of(true);
 
 
     await TestBed.configureTestingModule({

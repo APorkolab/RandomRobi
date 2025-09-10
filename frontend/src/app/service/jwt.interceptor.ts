@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 export class JwtInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) { }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const authToken = this.authService.getToken();
     if (authToken) {
       req = req.clone({

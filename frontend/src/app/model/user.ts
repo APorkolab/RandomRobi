@@ -1,7 +1,6 @@
 export class User {
-	[k: string]: any;
 	id: number | string = '';
-	username: string = '';
-	password: string = '';
+	username = '';
+	password = '';
 	email?: string = '';
 }

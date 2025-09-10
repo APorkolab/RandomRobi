@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { VideoService } from '../../service/video.service';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -13,9 +13,9 @@ import { Video } from 'src/app/model/video';
     standalone: false
 })
 export class HomeComponent implements OnInit {
-  link: string = '';
-  showAdminButton: boolean = false;
-  isLoading: boolean = false;
+  link = '';
+  showAdminButton = false;
+  isLoading = false;
   getRandomVideoClick$ = new Subject<void>();  // Subject a debounce-hoz
   currentYear: number = new Date().getFullYear();
 

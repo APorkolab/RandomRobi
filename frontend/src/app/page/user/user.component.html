@@ -4,7 +4,7 @@
     <button mat-stroked-button routerLink="/admin">Go to Video Page</button>
     <span class="spacer"></span>
     <button *ngIf="(isUserLoggedIn$ | async)" mat-stroked-button color="warn" routerLink="/login">Sign Out</button>
-    <button *ngIf="!(isUserLoggedIn$ | async)" mat-flat-button color="accent" routerLink="/login">Sign In</button>
+    <button *ngIf="(isUserLoggedIn$ | async) === false" mat-flat-button color="accent" routerLink="/login">Sign In</button>
   </div>
 
   <h1>User Management</h1>

@@ -16,7 +16,7 @@ export class VideoService extends BaseService {
     return this.get<Video[]>(this.apiEndpoint);
   }
 
-  getLatestVideo(): Observable<any> {
+  getLatestVideo(): Observable<Video> {
     return this.http.get(`${this.apiEndpoint}/latest`);
   }
 
