@@ -8,7 +8,8 @@
 require('dotenv').config();
 const sequelize = require('../config/database');
 const User = require('../models/user');
-const Video = require('../models/video'); // Import Video model
+// eslint-disable-next-line no-unused-vars
+const Video = require('../models/video'); // Import Video model for sequelize.sync()
 const logger = require('../logger/logger');
 
 async function setupTestDatabase() {
