@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+const expressInner = require('express');
 const logger = require('../logger/logger');
 const { AppError } = require('./utils/errors');
 const rateLimiter = require('../middlewares/rateLimiting');
@@ -59,30 +60,34 @@ app.set('trust proxy', 1);
 app.use('/api/', rateLimiter);
 
 // CORS configuration
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
   : ['http://localhost:4200', 'http://localhost:3000'];
 
 const corsOptions = {
-  origin: function (origin, callback) {
+  origin(origin, callback) {
     // Always allow requests with no origin (like mobile apps, tests, etc.)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
-    } else {
+    } else if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       // For development and testing, be more permissive
-      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-        callback(null, true);
-      } else {
-        logger.warn(`CORS blocked origin: ${origin}`);
-        callback(new AppError('Not allowed by CORS', 403));
-      }
+      callback(null, true);
+    } else {
+      logger.warn(`CORS blocked origin: ${origin}`);
+      callback(new AppError('Not allowed by CORS', 403));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Access-Control-Request-Method', 'Access-Control-Request-Headers'],
-  exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers'],
+  allowedHeaders: [
+    'Content-Type', 'Authorization', 'X-Requested-With',
+    'Access-Control-Request-Method', 'Access-Control-Request-Headers'
+  ],
+  exposedHeaders: [
+    'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Headers'
+  ],
   credentials: true,
   optionsSuccessStatus: 200,
   maxAge: 86400, // 24 hours
@@ -91,8 +96,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 // Manually set Access-Control-Allow-Origin when origin is allowed
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  const { origin } = req.headers;
+  const isDev = process.env.NODE_ENV === 'development'
+    || process.env.NODE_ENV === 'test';
+  if (!origin || allowedOrigins.includes(origin) || isDev) {
     res.header('Access-Control-Allow-Origin', origin || '*');
     res.header('Access-Control-Allow-Credentials', 'true');
   }
@@ -104,19 +111,17 @@ logger.info(`CORS enabled for origins: ${allowedOrigins.join(', ')}`);
 const logFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
 app.use(morgan(logFormat, {
   stream: { write: (message) => logger.info(message.trim()) },
-  skip: (req, res) => {
-    // Skip logging for health checks and static assets
-    return req.url === '/health' || req.url.startsWith('/static/');
-  }
+  skip: (req) => req.url === '/health' || req.url.startsWith('/static/')
+
 }));
 
 // Body parsing middleware
-app.use(express.json({ 
+app.use(express.json({
   limit: '10mb',
   strict: true,
 }));
-app.use(express.urlencoded({ 
-  extended: false, 
+app.use(express.urlencoded({
+  extended: false,
   limit: '10mb',
 }));
 
@@ -157,7 +162,7 @@ const swaggerOptions = {
       },
     },
   },
-  apis: [__dirname + '/../controllers/**/*.js', __dirname + '/../models/**/*.js'],
+  apis: [`${__dirname}/../controllers/**/*.js`, `${__dirname}/../models/**/*.js`],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -176,7 +181,7 @@ app.get('/health', async (req, res) => {
       message: 'Database connection is healthy',
       timestamp: new Date().toISOString(),
     };
-    
+
     const health = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -186,7 +191,7 @@ app.get('/health', async (req, res) => {
       database: dbHealth,
       memory: process.memoryUsage(),
     };
-    
+
     res.status(200).json(health);
   } catch (error) {
     logger.error('Health check failed:', error);
@@ -199,7 +204,7 @@ app.get('/health', async (req, res) => {
 });
 
 // API routes with versioning
-app.use('/api/v1/videos', videoRouter);  // Video routes have their own auth logic
+app.use('/api/v1/videos', videoRouter); // Video routes have their own auth logic
 app.use('/api/v1/cron', authenticate, cronRouter);
 app.use('/api/v1/users', authenticate, userRouter);
 app.use('/api/v1/auth', loginRouter);
@@ -216,16 +221,16 @@ app.get('/', (req, res) => {
   });
 });
 
-// Legacy routes for backward compatibility  
+// Legacy routes for backward compatibility
 app.use('/video', videoRouter);
 app.use('/cron', cronRouter);
 app.use('/user', authenticate, userRouter);
 // Mount login router for legacy paths
-const express_inner = require('express');
-const loginRouterLegacy = express_inner.Router();
+const loginRouterLegacy = expressInner.Router();
 
 // Import the actual login logic from the login controller
 const loginController = require('../controllers/login/router');
+
 loginRouterLegacy.use('/', loginController);
 
 app.use('/', loginRouterLegacy);
@@ -250,7 +255,7 @@ app.use((err, req, res, next) => {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
-    
+
     return res.status(err.statusCode).json({
       error: {
         message: err.message,
@@ -259,7 +264,7 @@ app.use((err, req, res, next) => {
       },
     });
   }
-  
+
   // Handle programming errors
   logger.error('Programming error:', {
     error: err.message,
@@ -268,12 +273,12 @@ app.use((err, req, res, next) => {
     method: req.method,
     ip: req.ip,
   });
-  
+
   // Don't leak error details in production
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'Something went wrong!' 
+  const message = process.env.NODE_ENV === 'production'
+    ? 'Something went wrong!'
     : err.message;
-    
+
   res.status(500).json({
     error: {
       message,

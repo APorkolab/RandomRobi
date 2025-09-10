@@ -18,6 +18,7 @@ class User extends Model {
    * Get user data without sensitive information
    */
   toSafeJSON() {
+    // eslint-disable-next-line no-unused-vars
     const { password, ...safeData } = this.toJSON();
     return safeData;
   }
@@ -44,7 +45,7 @@ User.init({
     primaryKey: true,
     autoIncrement: true,
   },
-  
+
   username: {
     type: DataTypes.STRING(30),
     allowNull: false,
@@ -65,7 +66,7 @@ User.init({
       },
     },
   },
-  
+
   email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -85,7 +86,7 @@ User.init({
       this.setDataValue('email', value.toLowerCase().trim());
     },
   },
-  
+
   password: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -99,7 +100,7 @@ User.init({
       },
     },
   },
-  
+
   role: {
     type: DataTypes.ENUM('admin', 'user'),
     allowNull: false,
@@ -111,30 +112,30 @@ User.init({
       },
     },
   },
-  
+
   isActive: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true,
   },
-  
+
   emailVerified: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
   },
-  
+
   lastLoginAt: {
     type: DataTypes.DATE,
     allowNull: true,
   },
-  
+
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
-  
+
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -145,7 +146,7 @@ User.init({
   modelName: 'User',
   tableName: 'users',
   timestamps: true,
-  
+
   // Indexes for performance
   indexes: [
     {
@@ -166,14 +167,14 @@ User.init({
       fields: ['createdAt'],
     },
   ],
-  
+
   // Default scope excludes password
   defaultScope: {
     attributes: {
       exclude: ['password'],
     },
   },
-  
+
   // Named scopes
   scopes: {
     withPassword: {
@@ -181,26 +182,26 @@ User.init({
         include: ['password'],
       },
     },
-    
+
     active: {
       where: {
         isActive: true,
       },
     },
-    
+
     admins: {
       where: {
         role: 'admin',
       },
     },
-    
+
     verified: {
       where: {
         emailVerified: true,
       },
     },
   },
-  
+
   // Hooks
   hooks: {
     // Hash password before creating user
@@ -210,7 +211,7 @@ User.init({
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
-    
+
     // Hash password before updating user
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
@@ -218,7 +219,7 @@ User.init({
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
-    
+
     // Validate password strength before save
     beforeValidate: (user) => {
       if (user.password && user.changed('password')) {
@@ -234,6 +235,7 @@ User.init({
 /**
  * Associations
  */
+// eslint-disable-next-line no-unused-vars
 User.associate = (models) => {
   // User has many videos (if tracking who created videos)
   // User.hasMany(models.Video, {
@@ -245,25 +247,25 @@ User.associate = (models) => {
 /**
  * Class methods
  */
-User.findByCredentials = async function(username, password) {
+User.findByCredentials = async function findByCredentials(username, password) {
   const user = await this.scope('withPassword').findOne({
     where: {
       username,
       isActive: true,
     },
   });
-  
+
   if (!user || !(await user.comparePassword(password))) {
     return null;
   }
-  
+
   // Update last login
   await user.updateLastLogin();
-  
+
   return user;
 };
 
-User.createAdmin = async function(userData) {
+User.createAdmin = async function createAdmin(userData) {
   return this.create({
     ...userData,
     role: 'admin',

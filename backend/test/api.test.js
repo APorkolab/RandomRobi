@@ -68,7 +68,7 @@ describe('API Integration Tests', () => {
 
   describe('Video API', () => {
     describe('GET /api/v1/videos/random', () => {
-      it('should return a random video (public endpoint)', async function() {
+      it('should return a random video (public endpoint)', async function () {
         this.timeout(10000);
         const response = await request(BASE_URL)
           .get('/api/v1/videos/random')
@@ -80,7 +80,7 @@ describe('API Integration Tests', () => {
     });
 
     describe('GET /video/random (legacy)', () => {
-      it('should work with legacy route', async function() {
+      it('should work with legacy route', async function () {
         this.timeout(10000);
         const response = await request(BASE_URL)
           .get('/video/random')
@@ -111,7 +111,7 @@ describe('API Integration Tests', () => {
           .expect(401);
       });
 
-      it('should allow access with valid token', async function() {
+      it('should allow access with valid token', async function () {
         if (!authToken) {
           this.skip();
         }
@@ -122,7 +122,7 @@ describe('API Integration Tests', () => {
           .expect(200);
 
         expect(response.body).to.be.an('array').or.an('object');
-        
+
         // If it's paginated response
         if (response.body.data) {
           expect(response.body).to.have.property('data');
@@ -131,7 +131,7 @@ describe('API Integration Tests', () => {
         }
       });
 
-      it('should allow creating videos with authentication', async function() {
+      it('should allow creating videos with authentication', async function () {
         if (!authToken) {
           this.skip();
         }
@@ -155,7 +155,7 @@ describe('API Integration Tests', () => {
         testVideoId = response.body.id;
       });
 
-      it('should allow updating videos', async function() {
+      it('should allow updating videos', async function () {
         if (!authToken || !testVideoId) {
           this.skip();
         }
@@ -175,7 +175,7 @@ describe('API Integration Tests', () => {
         expect(response.body).to.have.property('title', 'Updated Test Video');
       });
 
-      it('should allow deleting videos', async function() {
+      it('should allow deleting videos', async function () {
         if (!authToken || !testVideoId) {
           this.skip();
         }
@@ -196,7 +196,7 @@ describe('API Integration Tests', () => {
           .expect(401);
       });
 
-      it('should allow admin to access users', async function() {
+      it('should allow admin to access users', async function () {
         if (!authToken) {
           this.skip();
         }
@@ -207,7 +207,7 @@ describe('API Integration Tests', () => {
           .expect(200);
 
         expect(response.body).to.be.an('array').or.an('object');
-        
+
         // Check if it's paginated response
         if (response.body.data) {
           expect(response.body.data).to.be.an('array');
@@ -218,21 +218,25 @@ describe('API Integration Tests', () => {
   });
 
   describe('Rate Limiting', () => {
-    it('should apply rate limiting to API routes', async function() {
+    it('should apply rate limiting to API routes', async function () {
       this.timeout(8000); // Reduce timeout
 
       // Test with a simple health endpoint to avoid video generation delays
       const maxRequests = 5; // Reduce number of requests
       const responses = [];
 
-      for (let i = 0; i < maxRequests; i++) {
+      for (let i = 0; i < maxRequests; i += 1) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           const response = await request(BASE_URL)
             .get('/health');
           responses.push(response);
-          
+
           // Small delay between requests
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
         } catch (error) {
           // If we hit rate limit, that's expected behavior
           if (error.status === 429) {
@@ -242,10 +246,10 @@ describe('API Integration Tests', () => {
           }
         }
       }
-      
+
       expect(responses).to.have.length(maxRequests);
       // At least some requests should succeed
-      const successCount = responses.filter(r => r.status === 200).length;
+      const successCount = responses.filter((r) => r.status === 200).length;
       expect(successCount).to.be.greaterThan(0);
     });
   });

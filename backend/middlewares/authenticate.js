@@ -11,20 +11,21 @@ const jwt = require('jsonwebtoken');
  */
 
 module.exports = (req, res, next) => {
-	const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		return res.sendStatus(401); // Unauthorized
-	}
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.sendStatus(401); // Unauthorized
+  }
 
-	const token = authHeader.split(' ')[1];
-	const secret = process.env.JWT_SECRET || (process.env.NODE_ENV === 'development' ? 'bociBociTarkaSeFuleSeFarka' : 'bociBociTarkaSeFuleSeFarka');
+  const token = authHeader.split(' ')[1];
+  const secret = process.env.JWT_SECRET
+    || (process.env.NODE_ENV === 'development' ? 'bociBociTarkaSeFuleSeFarka' : 'bociBociTarkaSeFuleSeFarka');
 
-	jwt.verify(token, secret, (err, user) => {
-		if (err) {
-			return res.sendStatus(403); // Forbidden
-		}
-		req.user = user;
-		next();
-	});
+  jwt.verify(token, secret, (err, user) => {
+    if (err) {
+      return res.sendStatus(403); // Forbidden
+    }
+    req.user = user;
+    next();
+  });
 };

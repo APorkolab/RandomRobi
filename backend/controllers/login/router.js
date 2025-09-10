@@ -115,7 +115,7 @@ router.post('/login', async (req, res) => {
 
     // Jelszó összehasonlítás bcrypt használatával
     const isMatch = await bcrypt.compare(password, user.password);
-    
+
     if (isMatch) {
       const accessToken = jwt.sign({
         username: user.username,
@@ -125,19 +125,18 @@ router.post('/login', async (req, res) => {
       });
 
       return res.json({
-        token: accessToken,        // For test compatibility
-        accessToken,              // For API documentation
+        token: accessToken, // For test compatibility
+        accessToken, // For API documentation
         user: {
           id: user.id,
           username: user.username,
           email: user.email
         }
       });
-    } else {
-      return res.status(401).json({
-        error: 'Helytelen jelszó'
-      });
     }
+    return res.status(401).json({
+      error: 'Helytelen jelszó'
+    });
   } catch (error) {
     console.error('Bejelentkezési hiba:', error);
     return res.status(500).json({
@@ -175,8 +174,6 @@ router.post('/login', async (req, res) => {
  *                   example: Szerver hiba történt a kijelentkezés során
  */
 // Kijelentkezési Endpoint
-router.post('/logout', (req, res) => {
-  return res.json({ message: 'Sikeres kijelentkezés' });
-});
+router.post('/logout', (req, res) => res.json({ message: 'Sikeres kijelentkezés' }));
 
 module.exports = router;

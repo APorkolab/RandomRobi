@@ -6,49 +6,53 @@ const { ValidationError } = require('./errors');
  */
 const schemas = {
   id: Joi.number().integer().positive().required(),
-  
+
   pagination: Joi.object({
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(10),
+    limit: Joi.number().integer().min(1).max(100)
+      .default(10),
   }),
-  
+
   user: {
     create: Joi.object({
-      username: Joi.string().alphanum().min(3).max(30).required(),
+      username: Joi.string().alphanum().min(3).max(30)
+        .required(),
       email: Joi.string().email().required(),
       password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).required()
         .messages({
+          // eslint-disable-next-line max-len
           'string.pattern.base': 'Password must contain at least one lowercase letter, one uppercase letter, and one digit'
         }),
     }),
-    
+
     update: Joi.object({
       username: Joi.string().alphanum().min(3).max(30),
       email: Joi.string().email(),
       password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
         .messages({
+          // eslint-disable-next-line max-len
           'string.pattern.base': 'Password must contain at least one lowercase letter, one uppercase letter, and one digit'
         }),
     }).min(1),
-    
+
     login: Joi.object({
       username: Joi.string().required(),
       password: Joi.string().required(),
     }),
   },
-  
+
   video: {
     create: Joi.object({
       link: Joi.string().uri().required(),
       createdAt: Joi.date().iso().optional(),
     }),
-    
+
     update: Joi.object({
       link: Joi.string().uri(),
       createdAt: Joi.date().iso(),
     }).min(1),
   },
-  
+
   query: Joi.object({
     search: Joi.string().max(255),
     sortBy: Joi.string().valid('id', 'createdAt', 'username', 'email', 'link'),
@@ -59,27 +63,25 @@ const schemas = {
 /**
  * Middleware for request validation
  */
-const validate = (schema, property = 'body') => {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req[property], {
-      allowUnknown: false,
-      stripUnknown: true,
-      abortEarly: false,
-    });
-    
-    if (error) {
-      const errors = error.details.map(detail => ({
-        field: detail.path.join('.'),
-        message: detail.message,
-        value: detail.context.value,
-      }));
-      
-      throw new ValidationError('Validation failed', errors);
-    }
-    
-    req[property] = value;
-    next();
-  };
+const validate = (schema, property = 'body') => (req, res, next) => {
+  const { error, value } = schema.validate(req[property], {
+    allowUnknown: false,
+    stripUnknown: true,
+    abortEarly: false,
+  });
+
+  if (error) {
+    const errors = error.details.map((detail) => ({
+      field: detail.path.join('.'),
+      message: detail.message,
+      value: detail.context.value,
+    }));
+
+    throw new ValidationError('Validation failed', errors);
+  }
+
+  req[property] = value;
+  next();
 };
 
 /**
@@ -107,17 +109,17 @@ const asyncValidate = async (schema, data) => {
       stripUnknown: true,
       abortEarly: false,
     });
-    
+
     if (error) {
-      const errors = error.details.map(detail => ({
+      const errors = error.details.map((detail) => ({
         field: detail.path.join('.'),
         message: detail.message,
         value: detail.context.value,
       }));
-      
+
       throw new ValidationError('Validation failed', errors);
     }
-    
+
     return value;
   } catch (err) {
     if (err instanceof ValidationError) {
@@ -132,7 +134,7 @@ const asyncValidate = async (schema, data) => {
  */
 const sanitizeHtml = (dirty) => {
   if (typeof dirty !== 'string') return dirty;
-  
+
   return dirty
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -149,16 +151,17 @@ const sanitizeObject = (obj) => {
   if (obj === null || typeof obj !== 'object') {
     return typeof obj === 'string' ? sanitizeHtml(obj) : obj;
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(sanitizeObject);
   }
-  
+
   const sanitized = {};
+  // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of Object.entries(obj)) {
     sanitized[key] = sanitizeObject(value);
   }
-  
+
   return sanitized;
 };
 

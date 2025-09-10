@@ -1,7 +1,7 @@
 const express = require('express');
+
 const router = express.Router();
 const User = require('../../models/user');
-const bcrypt = require('bcrypt');
 
 /**
  * @swagger
@@ -50,18 +50,18 @@ const bcrypt = require('bcrypt');
  *                   example: Error creating user.
  */
 router.post('/', async (req, res) => {
-	try {
-		const { username, password, email } = req.body;
-		await User.create({ username, password, email });
-		res.status(201).json({
-			message: 'Új felhasználó sikeresen létrehozva.'
-		});
-	} catch (error) {
-		console.error('Hiba a felhasználó létrehozásakor:', error);
-		res.status(500).json({
-			error: 'Hiba történt a felhasználó létrehozásakor.'
-		});
-	}
+  try {
+    const { username, password, email } = req.body;
+    await User.create({ username, password, email });
+    res.status(201).json({
+      message: 'Új felhasználó sikeresen létrehozva.'
+    });
+  } catch (error) {
+    console.error('Hiba a felhasználó létrehozásakor:', error);
+    res.status(500).json({
+      error: 'Hiba történt a felhasználó létrehozásakor.'
+    });
+  }
 });
 
 /**
@@ -103,13 +103,13 @@ router.post('/', async (req, res) => {
  *                   example: Error fetching users.
  */
 router.get('/', async (req, res) => {
-	try {
-		const users = await User.findAll();
-		res.json(users);
-	} catch (error) {
-		console.error('Error fetching users:', error);
-		res.status(500).send('Error fetching users');
-	}
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Error fetching users');
+  }
 });
 
 /**
@@ -167,16 +167,16 @@ router.get('/', async (req, res) => {
  *                   example: Error fetching user.
  */
 router.get('/:id', async (req, res) => {
-	try {
-		const user = await User.findByPk(req.params.id);
-		if (!user) {
-			return res.status(404).send('User not found');
-		}
-		res.json(user);
-	} catch (error) {
-		console.error('Error fetching user:', error);
-		res.status(500).send('Error fetching user');
-	}
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).send('Error fetching user');
+  }
 });
 
 /**
@@ -244,27 +244,27 @@ router.get('/:id', async (req, res) => {
  *                   example: Error updating user.
  */
 router.put('/:id', async (req, res) => {
-	try {
-		const result = await User.update(req.body, {
-			where: {
-				id: req.params.id
-			},
-			individualHooks: true
-		});
-		if (result[0] === 0) {
-			return res.status(404).json({
-				error: 'User not found'
-			});
-		}
-		res.status(200).json({
-			message: 'The user has been updated.'
-		});
-	} catch (error) {
-		console.error('Error updating user:', error);
-		res.status(500).json({
-			error: 'Error updating user'
-		});
-	}
+  try {
+    const result = await User.update(req.body, {
+      where: {
+        id: req.params.id
+      },
+      individualHooks: true
+    });
+    if (result[0] === 0) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+    res.status(200).json({
+      message: 'The user has been updated.'
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      error: 'Error updating user'
+    });
+  }
 });
 
 /**
@@ -316,26 +316,26 @@ router.put('/:id', async (req, res) => {
  *                   example: Error deleting user.
  */
 router.delete('/:id', async (req, res) => {
-	try {
-		const result = await User.destroy({
-			where: {
-				id: req.params.id
-			}
-		});
-		if (result === 0) {
-			return res.status(404).json({
-				error: 'User not found'
-			});
-		}
-		res.status(200).json({
-			message: 'The user has been deleted.'
-		});
-	} catch (error) {
-		console.error('Error deleting user:', error);
-		res.status(500).json({
-			error: 'Error deleting user'
-		});
-	}
+  try {
+    const result = await User.destroy({
+      where: {
+        id: req.params.id
+      }
+    });
+    if (result === 0) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+    res.status(200).json({
+      message: 'The user has been deleted.'
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({
+      error: 'Error deleting user'
+    });
+  }
 });
 
 module.exports = router;

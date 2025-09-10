@@ -25,6 +25,7 @@ class User extends Model {
    * Get user data without sensitive information
    */
   toSafeJSON() {
+    // eslint-disable-next-line no-unused-vars
     const { password, ...safeData } = this.toJSON();
     return safeData;
   }
@@ -51,7 +52,7 @@ User.init({
     primaryKey: true,
     autoIncrement: true,
   },
-  
+
   username: {
     type: DataTypes.STRING(30),
     allowNull: false,
@@ -72,7 +73,7 @@ User.init({
       },
     },
   },
-  
+
   email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -92,7 +93,7 @@ User.init({
       this.setDataValue('email', value.toLowerCase().trim());
     },
   },
-  
+
   password: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -106,7 +107,7 @@ User.init({
       },
     },
   },
-  
+
   role: {
     type: DataTypes.ENUM('admin', 'user'),
     allowNull: false,
@@ -118,13 +119,13 @@ User.init({
       },
     },
   },
-  
+
   isActive: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true,
   },
-  
+
   lastLoginAt: {
     type: DataTypes.DATE,
     allowNull: true,
@@ -134,7 +135,7 @@ User.init({
   modelName: 'User',
   tableName: 'User', // Keep original table name for compatibility
   timestamps: false, // Keep as false for compatibility
-  
+
   // Indexes for performance
   indexes: [
     {
@@ -152,14 +153,14 @@ User.init({
       fields: ['isActive'],
     },
   ],
-  
+
   // Default scope excludes password
   defaultScope: {
     attributes: {
       exclude: ['password'],
     },
   },
-  
+
   // Named scopes
   scopes: {
     withPassword: {
@@ -167,34 +168,34 @@ User.init({
         include: ['password'],
       },
     },
-    
+
     active: {
       where: {
         isActive: true,
       },
     },
-    
+
     admins: {
       where: {
         role: 'admin',
       },
     },
   },
-  
+
   // Hooks
   hooks: {
     // Hash password before creating user
     beforeCreate: async (user) => {
       if (user.password) {
-        const salt = await bcrypt.genSalt(parseInt(BCRYPT_ROUNDS));
+        const salt = await bcrypt.genSalt(parseInt(BCRYPT_ROUNDS, 10));
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
-    
+
     // Hash password before updating user
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
-        const salt = await bcrypt.genSalt(parseInt(BCRYPT_ROUNDS));
+        const salt = await bcrypt.genSalt(parseInt(BCRYPT_ROUNDS, 10));
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
@@ -204,25 +205,25 @@ User.init({
 /**
  * Class methods
  */
-User.findByCredentials = async function(username, password) {
+User.findByCredentials = async function findByCredentials(username, password) {
   const user = await this.scope('withPassword').findOne({
     where: {
       username,
       isActive: true,
     },
   });
-  
+
   if (!user || !(await user.comparePassword(password))) {
     return null;
   }
-  
+
   // Update last login
   await user.updateLastLogin();
-  
+
   return user;
 };
 
-User.createAdmin = async function(userData) {
+User.createAdmin = async function createAdmin(userData) {
   return this.create({
     ...userData,
     role: 'admin',

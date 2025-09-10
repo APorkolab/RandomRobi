@@ -10,8 +10,8 @@ class Video extends Model {
    */
   getVideoId() {
     if (!this.link) return null;
-    
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+
+    const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
     const match = this.link.match(regex);
     return match ? match[1] : null;
   }
@@ -45,11 +45,11 @@ class Video extends Model {
    */
   getFormattedDuration() {
     if (!this.duration) return null;
-    
+
     const hours = Math.floor(this.duration / 3600);
     const minutes = Math.floor((this.duration % 3600) / 60);
     const seconds = this.duration % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
@@ -72,7 +72,7 @@ Video.init({
     primaryKey: true,
     autoIncrement: true,
   },
-  
+
   link: {
     type: DataTypes.TEXT,
     allowNull: false,
@@ -108,7 +108,7 @@ Video.init({
       this.setDataValue('link', value);
     },
   },
-  
+
   title: {
     type: DataTypes.STRING(500),
     allowNull: true,
@@ -119,12 +119,12 @@ Video.init({
       },
     },
   },
-  
+
   description: {
     type: DataTypes.TEXT,
     allowNull: true,
   },
-  
+
   keyword: {
     type: DataTypes.STRING(100),
     allowNull: true,
@@ -136,7 +136,7 @@ Video.init({
       },
     },
   },
-  
+
   duration: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -148,7 +148,7 @@ Video.init({
       },
     },
   },
-  
+
   views: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -161,7 +161,7 @@ Video.init({
       },
     },
   },
-  
+
   rating: {
     type: DataTypes.DECIMAL(3, 2),
     allowNull: true,
@@ -177,11 +177,11 @@ Video.init({
       },
     },
   },
-  
+
   category: {
     type: DataTypes.ENUM(
       'music',
-      'gaming', 
+      'gaming',
       'news',
       'entertainment',
       'education',
@@ -194,7 +194,7 @@ Video.init({
     allowNull: true,
     defaultValue: 'other',
   },
-  
+
   language: {
     type: DataTypes.STRING(10),
     allowNull: true,
@@ -206,46 +206,46 @@ Video.init({
       },
     },
   },
-  
+
   isActive: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true,
     comment: 'Whether the video is active and can be shown',
   },
-  
+
   isFavorite: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
     comment: 'Whether the video is marked as favorite',
   },
-  
+
   lastViewedAt: {
     type: DataTypes.DATE,
     allowNull: true,
     comment: 'When the video was last viewed',
   },
-  
+
   source: {
     type: DataTypes.ENUM('random', 'manual', 'import', 'api'),
     allowNull: false,
     defaultValue: 'random',
     comment: 'How the video was added to the system',
   },
-  
+
   metadata: {
     type: DataTypes.JSON,
     allowNull: true,
     comment: 'Additional metadata about the video',
   },
-  
+
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
-  
+
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -256,7 +256,7 @@ Video.init({
   modelName: 'Video',
   tableName: 'videos',
   timestamps: true,
-  
+
   // Indexes for performance
   indexes: [
     {
@@ -305,7 +305,7 @@ Video.init({
       name: 'idx_videos_category_active',
     },
   ],
-  
+
   // Default scope
   defaultScope: {
     where: {
@@ -313,31 +313,31 @@ Video.init({
     },
     order: [['createdAt', 'DESC']],
   },
-  
+
   // Named scopes
   scopes: {
     all: {
       where: {},
     },
-    
+
     active: {
       where: {
         isActive: true,
       },
     },
-    
+
     inactive: {
       where: {
         isActive: false,
       },
     },
-    
+
     favorites: {
       where: {
         isFavorite: true,
       },
     },
-    
+
     recent: {
       where: {
         createdAt: {
@@ -345,18 +345,18 @@ Video.init({
         },
       },
     },
-    
+
     byCategory: (category) => ({
       where: {
         category,
       },
     }),
-    
+
     popular: {
       order: [['views', 'DESC']],
       limit: 20,
     },
-    
+
     topRated: {
       where: {
         rating: {
@@ -366,7 +366,7 @@ Video.init({
       order: [['rating', 'DESC']],
     },
   },
-  
+
   // Hooks
   hooks: {
     beforeCreate: (video) => {
@@ -378,7 +378,7 @@ Video.init({
         };
       }
     },
-    
+
     beforeUpdate: (video) => {
       // Update metadata on changes
       if (video.changed()) {
@@ -395,6 +395,7 @@ Video.init({
 /**
  * Associations
  */
+// eslint-disable-next-line no-unused-vars
 Video.associate = (models) => {
   // Video belongs to user (if tracking who added it)
   // Video.belongsTo(models.User, {
@@ -406,7 +407,7 @@ Video.associate = (models) => {
 /**
  * Class methods
  */
-Video.findByKeyword = async function(keyword) {
+Video.findByKeyword = async function findByKeyword(keyword) {
   return this.findAll({
     where: {
       keyword,
@@ -416,7 +417,7 @@ Video.findByKeyword = async function(keyword) {
   });
 };
 
-Video.findPopular = async function(limit = 10) {
+Video.findPopular = async function findPopular(limit = 10) {
   return this.scope('popular').findAll({
     limit,
     where: {
@@ -427,14 +428,14 @@ Video.findPopular = async function(limit = 10) {
   });
 };
 
-Video.getStats = async function() {
+Video.getStats = async function getStats() {
   const [total, active, favorites, recent] = await Promise.all([
     this.count({ where: {} }),
     this.count({ where: { isActive: true } }),
     this.count({ where: { isFavorite: true } }),
     this.scope('recent').count(),
   ]);
-  
+
   return {
     total,
     active,
@@ -444,29 +445,29 @@ Video.getStats = async function() {
   };
 };
 
-Video.findRandom = async function(options = {}) {
+Video.findRandom = async function findRandom(options = {}) {
   const { category, excludeIds = [] } = options;
-  
+
   const where = {
     isActive: true,
   };
-  
+
   if (category) {
     where.category = category;
   }
-  
+
   if (excludeIds.length > 0) {
     where.id = {
       [DataTypes.Op.notIn]: excludeIds,
     };
   }
-  
+
   const videos = await this.findAll({ where });
-  
+
   if (videos.length === 0) {
     return null;
   }
-  
+
   const randomIndex = Math.floor(Math.random() * videos.length);
   return videos[randomIndex];
 };

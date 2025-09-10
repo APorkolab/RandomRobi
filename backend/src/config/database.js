@@ -6,7 +6,8 @@ const logger = require('../../logger/logger');
  * Database configuration options
  */
 // Use SQLite for development if MySQL is not available
-const usesSQLite = config.database.name.endsWith('.db') || !config.database.host || config.database.host === 'localhost';
+const usesSQLite = config.database.name.endsWith('.db')
+  || !config.database.host || config.database.host === 'localhost';
 
 const sequelizeOptions = {
   ...(usesSQLite ? {
@@ -17,21 +18,21 @@ const sequelizeOptions = {
     port: config.database.port,
     dialect: 'mysql',
   }),
-  
+
   // Connection pooling
   pool: {
-    max: 20,        // Maximum connections
-    min: 0,         // Minimum connections
+    max: 20, // Maximum connections
+    min: 0, // Minimum connections
     acquire: 60000, // Maximum time (ms) to get connection
-    idle: 10000,    // Maximum time (ms) connection can be idle
-    evict: 10000,   // Time (ms) to check for idle connections
+    idle: 10000, // Maximum time (ms) connection can be idle
+    evict: 10000, // Time (ms) to check for idle connections
   },
-  
+
   // Logging configuration
-  logging: config.isDevelopment() 
+  logging: config.isDevelopment()
     ? (msg) => logger.debug(`[Sequelize] ${msg}`)
     : false,
-    
+
   // Performance optimizations
   dialectOptions: {
     charset: 'utf8mb4',
@@ -47,7 +48,7 @@ const sequelizeOptions = {
       },
     }),
   },
-  
+
   // Query options
   define: {
     timestamps: false,
@@ -56,10 +57,10 @@ const sequelizeOptions = {
     charset: 'utf8mb4',
     collate: 'utf8mb4_unicode_ci',
   },
-  
+
   // Benchmark queries in development
   benchmark: config.isDevelopment(),
-  
+
   // Retry configuration
   retry: {
     match: [
@@ -117,7 +118,7 @@ const initializeDatabase = async () => {
     // Test connection
     await sequelize.authenticate();
     logger.info('Database connection established successfully');
-    
+
     // Sync models based on environment
     if (config.app.createTables) {
       await sequelize.sync({ force: true });
@@ -129,7 +130,7 @@ const initializeDatabase = async () => {
       await sequelize.sync({ alter: false });
       logger.info('Database tables synchronized (alter: false)');
     }
-    
+
     return true;
   } catch (error) {
     logger.error('Failed to initialize database:', error);
@@ -175,7 +176,7 @@ const bulkCreate = async (model, data, options = {}) => {
     updateOnDuplicate: Object.keys(data[0] || {}),
     ...options,
   };
-  
+
   try {
     return await model.bulkCreate(data, defaultOptions);
   } catch (error) {
@@ -187,10 +188,12 @@ const bulkCreate = async (model, data, options = {}) => {
 /**
  * Connection event handlers
  */
+// eslint-disable-next-line no-unused-vars
 sequelize.afterConnect((connection) => {
   logger.debug('New database connection established');
 });
 
+// eslint-disable-next-line no-unused-vars
 sequelize.beforeDisconnect((connection) => {
   logger.debug('Database connection closing');
 });

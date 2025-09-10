@@ -1,4 +1,6 @@
+/* eslint-disable max-classes-per-file */
 const NodeCache = require('node-cache');
+// eslint-disable-next-line import/no-unresolved, import/extensions
 const logger = require('../logger/logger');
 
 /**
@@ -23,9 +25,9 @@ const CACHE_KEYS = {
 };
 
 const CACHE_TTL = {
-  SHORT: 300,    // 5 minutes
-  MEDIUM: 900,   // 15 minutes
-  LONG: 3600,    // 1 hour
+  SHORT: 300, // 5 minutes
+  MEDIUM: 900, // 15 minutes
+  LONG: 3600, // 1 hour
   VERY_LONG: 86400, // 24 hours
 };
 
@@ -35,7 +37,7 @@ const CACHE_TTL = {
 class MemoryCache {
   constructor() {
     this.cache = new NodeCache(CACHE_CONFIG);
-    this.cache.on('expired', (key, value) => {
+    this.cache.on('expired', (key) => {
       logger.debug(`Cache key expired: ${key}`);
     });
   }
@@ -176,13 +178,13 @@ class CacheManager {
   }
 
   handleError(error, operation, key = '') {
-    this.errorCount++;
+    this.errorCount += 1;
     logger.error(`Cache ${operation} error${key ? ` for key ${key}` : ''}:`, error);
 
     if (this.errorCount >= this.maxErrors) {
       this.isHealthy = false;
       logger.error(`Cache marked as unhealthy after ${this.errorCount} errors`);
-      
+
       setTimeout(() => {
         this.resetErrors();
         logger.info('Cache health reset, attempting recovery');
@@ -213,60 +215,56 @@ const cacheManager = new CacheManager();
 /**
  * Cache decorator for functions
  */
-const withCache = (key, ttl = CACHE_TTL.MEDIUM) => {
-  return (target, propertyName, descriptor) => {
-    const method = descriptor.value;
-    
-    descriptor.value = async function(...args) {
-      const cacheKey = typeof key === 'function' ? key(...args) : key;
-      
-      // Try to get from cache first
-      const cached = await cacheManager.get(cacheKey);
-      if (cached !== null) {
-        return cached;
-      }
-      
-      // Execute original method
-      const result = await method.apply(this, args);
-      
-      // Cache the result
-      if (result !== null && result !== undefined) {
-        await cacheManager.set(cacheKey, result, ttl);
-      }
-      
-      return result;
-    };
-    
-    return descriptor;
+const withCache = (key, ttl = CACHE_TTL.MEDIUM) => (target, propertyName, descriptor) => {
+  const method = descriptor.value;
+
+  descriptor.value = async function cachedMethod(...args) {
+    const cacheKey = typeof key === 'function' ? key(...args) : key;
+
+    // Try to get from cache first
+    const cached = await cacheManager.get(cacheKey);
+    if (cached !== null) {
+      return cached;
+    }
+
+    // Execute original method
+    const result = await method.apply(this, args);
+
+    // Cache the result
+    if (result !== null && result !== undefined) {
+      await cacheManager.set(cacheKey, result, ttl);
+    }
+
+    return result;
   };
+
+  return descriptor;
 };
 
 /**
  * Middleware to cache responses
  */
-const cacheMiddleware = (keyGenerator, ttl = CACHE_TTL.MEDIUM) => {
-  return async (req, res, next) => {
-    const cacheKey = typeof keyGenerator === 'function' 
-      ? keyGenerator(req) 
-      : keyGenerator;
+const cacheMiddleware = (keyGenerator, ttl = CACHE_TTL.MEDIUM) => async (req, res, next) => {
+  const cacheKey = typeof keyGenerator === 'function'
+    ? keyGenerator(req)
+    : keyGenerator;
 
-    const cached = await cacheManager.get(cacheKey);
-    if (cached !== null) {
-      logger.debug(`Serving cached response for: ${cacheKey}`);
-      return res.json(cached);
+  const cached = await cacheManager.get(cacheKey);
+  if (cached !== null) {
+    logger.debug(`Serving cached response for: ${cacheKey}`);
+    return res.json(cached);
+  }
+
+  // Override res.json to cache the response
+  const originalJson = res.json;
+  res.json = function responseJson(body) {
+    if (res.statusCode === 200 && body) {
+      cacheManager.set(cacheKey, body, ttl);
     }
-
-    // Override res.json to cache the response
-    const originalJson = res.json;
-    res.json = function(body) {
-      if (res.statusCode === 200 && body) {
-        cacheManager.set(cacheKey, body, ttl);
-      }
-      return originalJson.call(this, body);
-    };
-
-    next();
+    return originalJson.call(this, body);
   };
+
+  next();
 };
 
 module.exports = {

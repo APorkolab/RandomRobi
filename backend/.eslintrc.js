@@ -15,26 +15,26 @@ module.exports = {
     // Custom rules for the project
     'no-console': 'off', // Allow console.log for server logging
     'consistent-return': 'off',
-    'no-unused-vars': ['error', { 'argsIgnorePattern': 'next' }],
-    'no-param-reassign': ['error', { 'props': false }],
-    'max-len': ['error', { 'code': 120 }],
+    'no-unused-vars': ['error', { argsIgnorePattern: 'next' }],
+    'no-param-reassign': ['error', { props: false }],
+    'max-len': ['error', { code: 120 }],
     'linebreak-style': 'off', // Handle different OS line endings
     'import/no-dynamic-require': 'off',
     'global-require': 'off',
     'no-process-exit': 'off', // Allow process.exit in server startup
     'prefer-destructuring': ['error', {
-      'array': false,
-      'object': true
+      array: false,
+      object: true
     }],
     'object-curly-newline': ['error', {
-      'ObjectExpression': { 'consistent': true },
-      'ObjectPattern': { 'consistent': true }
+      ObjectExpression: { consistent: true },
+      ObjectPattern: { consistent: true }
     }],
     'comma-dangle': ['error', 'only-multiline'],
     'arrow-parens': ['error', 'always'],
     'no-underscore-dangle': 'off', // Allow _id and similar
     'import/no-extraneous-dependencies': ['error', {
-      'devDependencies': ['**/*.test.js', '**/*.spec.js']
+      devDependencies: ['**/*.test.js', '**/*.spec.js']
     }]
   },
   overrides: [

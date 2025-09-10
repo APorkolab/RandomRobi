@@ -42,24 +42,24 @@ const createAdminUser = async () => {
     });
 
     if (created) {
-      logger.info('Admin user created successfully', { 
-        id: user.id, 
+      logger.info('Admin user created successfully', {
+        id: user.id,
         username: user.username,
-        email: user.email 
+        email: user.email
       });
     } else {
-      logger.info('Admin user already exists', { 
-        id: user.id, 
-        username: user.username 
+      logger.info('Admin user already exists', {
+        id: user.id,
+        username: user.username
       });
-      
+
       // Update password if it's the default and we're in development
       if (NODE_ENV === 'development' && password !== 'AdminPass123!') {
         await user.update({ password });
         logger.info('Admin user password updated');
       }
     }
-    
+
     return user;
   } catch (error) {
     logger.error('Failed to create admin user:', error);
@@ -80,7 +80,7 @@ const initializeApp = async () => {
     logger.info('Initializing database...');
     await sequelize.authenticate();
     logger.info('Database connection established successfully');
-    
+
     if (process.env.CREATE_TABLES === 'true') {
       await sequelize.sync({ force: true });
       logger.info('Database tables created (force: true)');
@@ -99,7 +99,7 @@ const initializeApp = async () => {
 
     // Start the HTTP server
     const server = app.listen(PORT, '0.0.0.0', () => {
-      logger.info(`🚀 Server running successfully!`);
+      logger.info('🚀 Server running successfully!');
       logger.info(`📍 Local: http://localhost:${PORT}`);
       logger.info(`📚 API Docs: http://localhost:${PORT}/api-docs`);
       logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
@@ -109,15 +109,15 @@ const initializeApp = async () => {
     // Graceful shutdown handlers
     const gracefulShutdown = (signal) => {
       logger.info(`${signal} received. Starting graceful shutdown...`);
-      
+
       server.close(async (err) => {
         if (err) {
           logger.error('Error during server shutdown:', err);
           process.exit(1);
         }
-        
+
         logger.info('HTTP server closed');
-        
+
         try {
           await sequelize.close();
           logger.info('Database connections closed');
@@ -128,7 +128,7 @@ const initializeApp = async () => {
           process.exit(1);
         }
       });
-      
+
       // Force exit after 30 seconds
       setTimeout(() => {
         logger.error('Graceful shutdown timed out, forcing exit');
