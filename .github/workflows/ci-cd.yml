@@ -30,7 +30,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           cd backend
-          npm ci
+          npm i
 
       - name: Lint backend code
         run: |
@@ -61,7 +61,7 @@ jobs:
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm ci
+          npm i
 
       - name: Security audit frontend
         run: |
@@ -99,7 +99,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd backend
-          npm ci
+          npm i
 
       - name: Wait for MySQL
         run: |
@@ -174,7 +174,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend
-          npm ci
+          npm i
 
       - name: Build frontend
         run: |
