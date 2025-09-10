@@ -1,7 +1,30 @@
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { importProvidersFrom } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
 
-import { AppModule } from './app/app.module';
+import { AppComponent } from './app/app.component';
+import { routes } from './app/app-routing.module';
+import { JwtInterceptor } from './app/service/jwt.interceptor';
+import { AuthService } from './app/service/auth.service';
+import { VideoService } from './app/service/video.service';
 
-
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(routes),
+    importProvidersFrom(
+      BrowserAnimationsModule,
+      HttpClientModule
+    ),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true
+    },
+    DatePipe,
+    VideoService,
+    AuthService
+  ]
+}).catch(err => console.error(err));

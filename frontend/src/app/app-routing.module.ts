@@ -8,7 +8,7 @@ import { UserComponent } from './page/user/user.component';
 import { UserEditorComponent } from './page/user-editor/user-editor.component';
 import { AuthGuardService } from './service/auth-guard.service';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuardService] },

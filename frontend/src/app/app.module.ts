@@ -16,16 +16,6 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { HomeComponent } from './page/home/home.component';
-import { LoginComponent } from './page/login/login.component';
-import { AdminComponent } from './page/admin/admin.component';
-import { VideoEditorComponent } from './page/video-editor/video-editor.component';
-import { UserComponent } from './page/user/user.component';
-import { UserEditorComponent } from './page/user-editor/user-editor.component';
-import { SafePipe } from './pipe/safe.pipe';
-import { SorterPipe } from './pipe/sorter.pipe';
-import { FilterPipe } from './pipe/filter.pipe';
 import { JwtInterceptor } from './service/jwt.interceptor';
 import { AuthService } from './service/auth.service';
 import { VideoService } from './service/video.service';
@@ -33,18 +23,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    LoginComponent,
-    AdminComponent,
-    VideoEditorComponent,
-    UserComponent,
-    UserEditorComponent,
-    SafePipe,
-    SorterPipe,
-    FilterPipe,
-  ],
+  declarations: [],
   imports: [
     BrowserModule,
     FormsModule,
@@ -71,6 +50,6 @@ import { DatePipe } from '@angular/common';
     VideoService,
     AuthService,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: []
 })
 export class AppModule { }
