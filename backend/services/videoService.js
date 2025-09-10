@@ -23,29 +23,32 @@ const delay = (ms) => new Promise((resolve) => {
 async function getRandomKeyword() {
   try {
     // Try Datamuse API first (free, reliable, no API key needed)
-    const patterns = ['a*', 'b*', 'c*', 'd*', 'e*', 'f*', 'g*', 'h*', 'i*', 'j*', 'k*', 'l*', 'm*', 'n*', 'o*', 'p*', 'r*', 's*', 't*', 'u*', 'v*', 'w*'];
+    const patterns = [
+      'a*', 'b*', 'c*', 'd*', 'e*', 'f*', 'g*', 'h*',
+      'i*', 'j*', 'k*', 'l*', 'm*', 'n*', 'o*', 'p*',
+      'r*', 's*', 't*', 'u*', 'v*', 'w*'
+    ];
     const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
     const maxWords = Math.floor(Math.random() * 100) + 50; // Get 50-150 words
-    
+
     const response = await axios.get(`https://api.datamuse.com/words?sp=${randomPattern}&max=${maxWords}`, {
       timeout: 5000
     });
-    
+
     if (response.data && response.data.length > 0) {
       const randomIndex = Math.floor(Math.random() * response.data.length);
       const keyword = response.data[randomIndex].word;
       logger.info(`Generated random keyword from Datamuse API: ${keyword}`);
       return keyword;
     }
-    
+
     // Fallback to local word generator if API doesn't return results
     const localKeyword = getRandomWord();
     logger.info(`Using local word generator fallback: ${localKeyword}`);
     return localKeyword;
-    
   } catch (error) {
     logger.warn('Datamuse API unavailable, using local word generator:', error.message);
-    
+
     // Fallback to local word generator
     try {
       const localKeyword = getRandomWord();
@@ -54,7 +57,10 @@ async function getRandomKeyword() {
     } catch (localError) {
       logger.error('Error with local word generator:', localError);
       // Final fallback to hardcoded keywords
-      const fallbackKeywords = ['music', 'technology', 'science', 'gaming', 'cooking', 'travel', 'art', 'sports', 'nature', 'history'];
+      const fallbackKeywords = [
+        'music', 'technology', 'science', 'gaming', 'cooking',
+        'travel', 'art', 'sports', 'nature', 'history'
+      ];
       const randomIndex = Math.floor(Math.random() * fallbackKeywords.length);
       const fallbackKeyword = fallbackKeywords[randomIndex];
       logger.info(`Using hardcoded fallback keyword: ${fallbackKeyword}`);

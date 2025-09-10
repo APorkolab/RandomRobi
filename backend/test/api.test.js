@@ -12,11 +12,11 @@ let axiosStub;
 
 before(() => {
   axiosStub = sinon.stub(axios, 'get');
-  
+
   // Mock Datamuse API
   axiosStub.withArgs(sinon.match(/api\.datamuse\.com/), sinon.match.any)
     .resolves({ data: [{ word: 'technology', score: 12345 }, { word: 'music', score: 12340 }] });
-    
+
   // Mock YouTube search
   axiosStub.withArgs(sinon.match(/youtube.com\/results/), sinon.match.any)
     .resolves({
@@ -169,7 +169,7 @@ describe('API Integration Tests', () => {
           .expect(200);
 
         expect(response.body).to.be.an('array');
-        
+
         // Each item should have expected properties
         if (response.body.length > 0) {
           expect(response.body[0]).to.have.property('id');
@@ -196,9 +196,9 @@ describe('API Integration Tests', () => {
 
         expect(response.body).to.have.property('id');
         expect(response.body).to.have.property('link');
-        expect(response.body.link).to.satisfy((link) => {
-          return link.includes('youtube.com/embed/') || link.includes('youtube.com/watch?v=');
-        });
+        expect(response.body.link).to.satisfy((link) => (
+          link.includes('youtube.com/embed/') || link.includes('youtube.com/watch?v=')
+        ));
 
         testVideoId = response.body.id;
       });
@@ -256,7 +256,7 @@ describe('API Integration Tests', () => {
           .expect(200);
 
         expect(response.body).to.be.an('array');
-        
+
         // Each user should have expected properties
         if (response.body.length > 0) {
           expect(response.body[0]).to.have.property('id');
@@ -293,7 +293,7 @@ describe('API Integration Tests', () => {
 
       expect(responses).to.have.length(maxRequests);
       // Most requests should succeed (health endpoint doesn't have heavy rate limiting)
-      const successfulRequests = responses.filter(status => status === 200);
+      const successfulRequests = responses.filter((status) => status === 200);
       expect(successfulRequests.length).to.be.greaterThan(0);
     });
   });
