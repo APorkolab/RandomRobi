@@ -1,13 +1,14 @@
 const request = require('supertest');
 const { expect } = require('chai');
+const app = require('../src/app');
 
-// We'll test against the running server
-const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+// Use the app instance directly instead of external URL
+const testApp = request(app);
 
 describe('Health Check Tests', () => {
   describe('GET /health', () => {
     it('should return health status with 200', async () => {
-      const response = await request(BASE_URL)
+      const response = await testApp
         .get('/health')
         .expect(200);
 
@@ -20,7 +21,7 @@ describe('Health Check Tests', () => {
     });
 
     it('should include database health information', async () => {
-      const response = await request(BASE_URL)
+      const response = await testApp
         .get('/health')
         .expect(200);
 
@@ -29,7 +30,7 @@ describe('Health Check Tests', () => {
     });
 
     it('should include memory usage information', async () => {
-      const response = await request(BASE_URL)
+      const response = await testApp
         .get('/health')
         .expect(200);
 
@@ -42,7 +43,7 @@ describe('Health Check Tests', () => {
 
   describe('GET /', () => {
     it('should return API information', async () => {
-      const response = await request(BASE_URL)
+      const response = await testApp
         .get('/')
         .expect(200);
 
@@ -56,7 +57,7 @@ describe('Health Check Tests', () => {
 
   describe('GET /api-docs', () => {
     it('should serve Swagger documentation', async () => {
-      await request(BASE_URL)
+      await testApp
         .get('/api-docs/')
         .expect(200)
         .expect('Content-Type', /text\/html/);
@@ -65,7 +66,7 @@ describe('Health Check Tests', () => {
 
   describe('404 Handler', () => {
     it('should return 404 for non-existent routes', async () => {
-      const response = await request(BASE_URL)
+      const response = await testApp
         .get('/nonexistent-route')
         .expect(404);
 

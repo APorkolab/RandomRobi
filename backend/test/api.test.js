@@ -1,7 +1,9 @@
 const request = require('supertest');
 const { expect } = require('chai');
+const app = require('../src/app');
 
-const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+// Use the app instance directly instead of external URL
+const testApp = request(app);
 
 describe('API Integration Tests', () => {
   let authToken = null;
@@ -15,7 +17,7 @@ describe('API Integration Tests', () => {
           password: 'AdminPass123!'
         };
 
-        const response = await request(BASE_URL)
+        const response = await testApp
           .post('/api/v1/auth/login')
           .send(loginData)
           .expect(200);
@@ -35,14 +37,14 @@ describe('API Integration Tests', () => {
           password: 'wrongpassword'
         };
 
-        await request(BASE_URL)
+        await testApp
           .post('/api/v1/auth/login')
           .send(loginData)
           .expect(401);
       });
 
       it('should fail with missing credentials', async () => {
-        await request(BASE_URL)
+        await testApp
           .post('/api/v1/auth/login')
           .send({})
           .expect(400);
@@ -56,7 +58,7 @@ describe('API Integration Tests', () => {
           password: 'AdminPass123!'
         };
 
-        const response = await request(BASE_URL)
+        const response = await testApp
           .post('/login')
           .send(loginData)
           .expect(200);
@@ -70,7 +72,7 @@ describe('API Integration Tests', () => {
     describe('GET /api/v1/videos/random', () => {
       it('should return a random video (public endpoint)', async function () {
         this.timeout(10000);
-        const response = await request(BASE_URL)
+        const response = await testApp
           .get('/api/v1/videos/random')
           .expect(200);
 
@@ -82,7 +84,7 @@ describe('API Integration Tests', () => {
     describe('GET /video/random (legacy)', () => {
       it('should work with legacy route', async function () {
         this.timeout(10000);
-        const response = await request(BASE_URL)
+        const response = await testApp
           .get('/video/random')
           .expect(200);
 
@@ -92,7 +94,7 @@ describe('API Integration Tests', () => {
 
     describe('GET /api/v1/videos/latest', () => {
       it('should return the latest video', async () => {
-        const response = await request(BASE_URL)
+        const response = await testApp
           .get('/api/v1/videos/latest')
           .expect(200);
 
@@ -106,7 +108,7 @@ describe('API Integration Tests', () => {
 
     describe('Protected Video Routes', () => {
       it('should require authentication for GET /api/v1/videos', async () => {
-        await request(BASE_URL)
+        await testApp
           .get('/api/v1/videos')
           .expect(401);
       });
@@ -116,7 +118,7 @@ describe('API Integration Tests', () => {
           this.skip();
         }
 
-        const response = await request(BASE_URL)
+        const response = await testApp
           .get('/api/v1/videos')
           .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
@@ -142,7 +144,7 @@ describe('API Integration Tests', () => {
           category: 'music'
         };
 
-        const response = await request(BASE_URL)
+        const response = await testApp
           .post('/api/v1/videos')
           .set('Authorization', `Bearer ${authToken}`)
           .send(videoData)
@@ -165,7 +167,7 @@ describe('API Integration Tests', () => {
           category: 'entertainment'
         };
 
-        const response = await request(BASE_URL)
+        const response = await testApp
           .put(`/api/v1/videos/${testVideoId}`)
           .set('Authorization', `Bearer ${authToken}`)
           .send(updateData)
@@ -180,7 +182,7 @@ describe('API Integration Tests', () => {
           this.skip();
         }
 
-        await request(BASE_URL)
+        await testApp
           .delete(`/api/v1/videos/${testVideoId}`)
           .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
@@ -191,7 +193,7 @@ describe('API Integration Tests', () => {
   describe('User Management', () => {
     describe('Protected User Routes', () => {
       it('should require authentication for user routes', async () => {
-        await request(BASE_URL)
+        await testApp
           .get('/api/v1/users')
           .expect(401);
       });
@@ -201,7 +203,7 @@ describe('API Integration Tests', () => {
           this.skip();
         }
 
-        const response = await request(BASE_URL)
+        const response = await testApp
           .get('/api/v1/users')
           .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
@@ -228,7 +230,7 @@ describe('API Integration Tests', () => {
       for (let i = 0; i < maxRequests; i += 1) {
         try {
           // eslint-disable-next-line no-await-in-loop
-          const response = await request(BASE_URL)
+          const response = await testApp
             .get('/health');
           responses.push(response);
 
@@ -256,7 +258,7 @@ describe('API Integration Tests', () => {
 
   describe('CORS', () => {
     it('should include CORS headers', async () => {
-      const response = await request(BASE_URL)
+      const response = await testApp
         .get('/health')
         .expect(200);
 
@@ -264,7 +266,7 @@ describe('API Integration Tests', () => {
     });
 
     it('should handle preflight requests', async () => {
-      await request(BASE_URL)
+      await testApp
         .options('/api/v1/videos')
         .set('Origin', 'http://localhost:4200')
         .set('Access-Control-Request-Method', 'GET')
