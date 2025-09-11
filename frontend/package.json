@@ -27,7 +27,7 @@
     "cors": "^2.8.5",
     "moment": "^2.30.1",
     "randomrobi": "file:",
-    "rxjs": "~7.8.1",
+    "rxjs": "~7.8.2",
     "tslib": "^2.7.0",
     "zone.js": "~0.15.1"
   },
