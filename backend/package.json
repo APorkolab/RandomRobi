@@ -37,7 +37,7 @@
     "mysql2": "^3.11.0",
     "node-cache": "^5.1.2",
     "node-cron": "^3.0.3",
-    "puppeteer": "^23.5.0",
+    "puppeteer": "^24.10.2",
     "randomrobi-backend": "file:",
     "sequelize": "^6.37.3",
     "sqlite3": "^5.1.7",
