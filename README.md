@@ -1,6 +1,5 @@
 # 🎬 Random Robi - Enterprise YouTube Video Generator
 
-[![CI/CD Pipeline](https://github.com/dr-porkolabadam/RandomRobi/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/dr-porkolabadam/RandomRobi/actions/workflows/ci-cd.yml)
 [![Coverage](https://codecov.io/gh/dr-porkolabadam/RandomRobi/branch/main/graph/badge.svg)](https://codecov.io/gh/dr-porkolabadam/RandomRobi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
