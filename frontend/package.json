@@ -10,7 +10,7 @@
     "lint": "ng lint"
   },
   "private": true,
-  "homepage": "https://www.randomrobi.porkolab.hu",
+  "homepage": "https://www.randomrobi.aporkolab.com",
   "dependencies": {
     "@angular/animations": "^20.2.2",
     "@angular/cdk": "^20.2.1",
